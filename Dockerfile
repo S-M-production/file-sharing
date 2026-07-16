@@ -16,5 +16,5 @@ COPY --from=build /app/publish .
 #Need to expose port 13000
 EXPOSE 13000
 #running the built files, using server public IP and port 13000 as entrance
-CMD ["dotnet","server-core.dll","64.181.236.111","13000"]
+CMD ["dotnet","server-core.dll","0.0.0.0","13000"]
 #CMD ["dotnet","server-core.dll","127.0.0.1","13000"]
