@@ -9,16 +9,12 @@ on:
 jobs:
 
   build:
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-
     runs-on: ubuntu-26.04  
 
     env:
       Solution_Name: file-share-solution.sln                        
-      Format_Test_Project_Path: your-test-project-path                
-      Server_Core_Test_Project_Path: your-test-project-path
+      Format_Test_Project_Path: format-test/format-test.csproj                
+      Server_Core_Test_Project_Path: server-core-test/server-core-test.csproj
       
     steps:
     - name: Checkout
@@ -30,12 +26,15 @@ jobs:
     - name: Install .NET Core
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 10.0.10
-
-    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v2
+        dotnet-version: 10.0.x
+        
+    #Restore before running
+    - name: Restore
+      run: dotnet restore $Solution_Name
 
     # Execute all unit tests in the solution
-    - name: Execute unit tests
-      run: dotnet test
+    - name: Execute format test
+      run: dotnet test $Format_Test_Project_Path
+
+    - name: Execute server core test
+      run: dotnet test $Server_Core_Test_Project_Path
