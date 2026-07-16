@@ -11,9 +11,10 @@ public class Program
         using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
         ILogger logger = factory.CreateLogger<Program>();
         Connector connector;
+        logger.LogInformation("Connecting to server");
         try
         {
-            connector = new Connector("127.0.0.1", 13000, logger);
+            connector = new Connector("64.181.236.111", 13000, logger);
         }
         catch (Exception e)
         {
