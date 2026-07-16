@@ -1,4 +1,4 @@
-name: CI pipeline
+name: CI/CD pipeline
 
 on:
   push:
@@ -72,3 +72,20 @@ jobs:
         tags: |
           munna00/file-sharing-server:latest 
           munna00/file-sharing-server:${{ github.sha }} 
+          
+  deploy:
+    needs: [test,build]
+    runs-on: ubuntu-26.04  
+    steps:
+    - name: ssh into VM
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ vars.SERVER_IP }}
+        username: ${{ vars.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          docker pull munna00/file-sharing-server:latest
+          docker stop file-sharing-deployed || true
+          docker rm -f file-sharing-deployed || true
+          docker run --name file-sharing-deployed -d -p 13000:13000 munna00/file-sharing-server:latest
