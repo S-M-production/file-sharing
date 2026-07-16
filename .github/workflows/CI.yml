@@ -1,0 +1,41 @@
+name: CI pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    runs-on: ubuntu-26.04  
+
+    env:
+      Solution_Name: file-share-solution.sln                        
+      Format_Test_Project_Path: your-test-project-path                
+      Server_Core_Test_Project_Path: your-test-project-path
+      
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1 #Only need latest commit
+
+    # Install the .NET Core workload
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.10
+
+    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v2
+
+    # Execute all unit tests in the solution
+    - name: Execute unit tests
+      run: dotnet test
