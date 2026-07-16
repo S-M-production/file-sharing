@@ -1,17 +1,15 @@
 using System.Net.Sockets;
-using System.Text;
-using format;
+using format.core;
 using Microsoft.Extensions.Logging;
-using stun_server.format;
 
-namespace file_share.core;
+namespace client_core.core;
 
 public class Connector
 {
     TcpClient client;
     ILogger logger;
 
-    public Connector(string server, Int32 port, ILogger logger)
+    public Connector(string server, int port, ILogger logger)
     {
         client = new TcpClient(server, port);
         this.logger = logger;

@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:client_ui.ViewModels;assembly=client-ui"
+        x:DataType="vm:MainWindowViewModel"
+        x:Class="client_ui.MainWindow"
+        Title="client_ui"
+        CanResize="False"
+        Width="800" Height="60">
+
+
+    <StackPanel Orientation="Horizontal" Spacing="2">
+        <TextBlock Width="25" Margin="7.5" VerticalAlignment="Center">IP:</TextBlock>
+        <TextBox Height="25" Width="200" PlaceholderText="Enter your IP address" Text="{Binding IpAddress, Mode=TwoWay}"/>
+        <TextBlock Width="35" Margin="10" VerticalAlignment="Center">Port:</TextBlock>
+        <TextBox Height="25" Width="200" PlaceholderText="Enter your port number" Text="{Binding PortNumber, Mode=TwoWay}"/>
+        <Button Content="Press Me" Click="Button_Click" Background="Purple"/>
+    </StackPanel>
+
+</Window>

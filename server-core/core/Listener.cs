@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
-using stun_server.logic;
+using server_core.logic;
 
-namespace core
+namespace server_core.core
 {
     public class Listener
     {

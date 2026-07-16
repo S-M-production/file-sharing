@@ -1,6 +1,6 @@
-using format;
+using format.core;
 
-namespace file_share.core;
+namespace client_core.core;
 
 public class HeartBeat
 {
@@ -18,7 +18,7 @@ public class HeartBeat
         while (true)
         {
             await Task.Delay((int)(_heartBeatInterval*1000));
-            await connection.AddTask(new ProtocolMessage(MessageType.Ping, 0, []));
+            await connection.AddTask(new ProtocolMessage(MessageType.Ping));
         }
     }
 }

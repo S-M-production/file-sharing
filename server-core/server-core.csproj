@@ -19,5 +19,8 @@
   <ItemGroup>
     <ProjectReference Include="..\format\format.csproj" />
   </ItemGroup>
+  <PropertyGroup>
+    <StartupObject>server_core.Program</StartupObject>
+  </PropertyGroup>
 
 </Project>

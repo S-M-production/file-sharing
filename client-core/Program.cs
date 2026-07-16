@@ -1,10 +1,8 @@
-﻿using System.Net.Sockets;
-using file_share.core;
-using format;
+﻿using client_core.core;
+using format.core;
 using Microsoft.Extensions.Logging;
-using stun_server.format;
 
-namespace file_share;
+namespace client_core;
 
 public class Program
 {
@@ -29,7 +27,7 @@ public class Program
             return;
         }
         Console.WriteLine("Connected!!!");
-        await connection.AddTask(new ProtocolMessage(MessageType.RequestUserList,0,[]));
+        await connection.AddTask(new ProtocolMessage(MessageType.RequestUserList));
         Console.WriteLine("RequestUserList");
         while (true) continue;
     }

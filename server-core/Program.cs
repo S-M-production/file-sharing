@@ -1,6 +1,9 @@
 ﻿using System.Net;
-using core;
 using Microsoft.Extensions.Logging;
+using server_core.core;
+
+namespace server_core;
+
 public class Program
 {
     static IPAddress? address;

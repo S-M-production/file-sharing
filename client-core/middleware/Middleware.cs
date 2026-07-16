@@ -2,7 +2,7 @@ using format.core;
 
 namespace client_core.middleware;
 
-public static class middleware
+public static class Middleware
 {
     public static ProtocolMessage? GetResponse(ProtocolMessage message)
     {

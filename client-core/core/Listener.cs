@@ -1,12 +1,9 @@
-using System.Net.Sockets;
-using System.Text;
-using Microsoft.Extensions.Logging;
 using System.Net;
-using format;
-using stun_server.format;
-using stun_server.middleware;
+using System.Net.Sockets;
+using format.core;
+using Microsoft.Extensions.Logging;
 
-namespace core
+namespace client_core.core
 {
 
     public class Listener(TcpClient tcpClient, ILogger logger)
@@ -40,7 +37,7 @@ namespace core
                 logger.LogInformation("Got message: {} {}:{}",ProtocolSerializer.ReadableSerialize(message),clientAddress,clientPort);
             
                 //TODO: Create routing layer and create middleware
-                ProtocolMessage? response = middleware.GetResponse(message);
+                ProtocolMessage? response = middleware.Middleware.GetResponse(message);
             
                 if (response == null)  continue;
             
