@@ -1,8 +1,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace stun_server.logic;
-
+namespace server_core.logic;
 public class ThreadSafeHasset
 {
     private readonly HashSet<string> _connections = new HashSet<string>();

@@ -1,13 +1,10 @@
-using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Channels;
-using core;
-using format;
+using format.core;
 using Microsoft.Extensions.Logging;
-using stun_server.format;
 
-namespace file_share.core;
+namespace client_core.core;
 
 public class Connection
 {

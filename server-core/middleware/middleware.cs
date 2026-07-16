@@ -1,10 +1,9 @@
-using format;
-using stun_server.format;
-using stun_server.logic;
+using format.core;
+using server_core.logic;
 
-namespace stun_server.middleware;
+namespace server_core.middleware;
 
-public static class middleware
+public static class Middleware
 {
     public static ProtocolMessage? GetResponse(ProtocolMessage message, ThreadSafeHasset connections)
     {

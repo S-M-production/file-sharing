@@ -17,5 +17,9 @@
   <ItemGroup>
     <ProjectReference Include="..\format\format.csproj" />
   </ItemGroup>
+  
+  <PropertyGroup>
+    <StartupObject>client_core.Program</StartupObject>
+  </PropertyGroup>
 
 </Project>
