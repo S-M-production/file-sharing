@@ -24,7 +24,16 @@ public class MainWindowViewModel : ReactiveObject
     public void OnButtonPressed()
     {
         Console.WriteLine("Button Pressed!");
-        Console.WriteLine($"IP: {IpAddress}, Port: {PortNumber}");
+
+        if (int.TryParse(PortNumber, out var port))
+        {
+            Console.WriteLine($"IP: {IpAddress}, Port: {port}");
+        }
+        else
+        {
+            Console.WriteLine($"IP: {IpAddress}, Port: invalid ({PortNumber})");
+        }
+
         Console.WriteLine($"Lifetime: {Application.Current?.ApplicationLifetime?.GetType().Name}");
     }
 }

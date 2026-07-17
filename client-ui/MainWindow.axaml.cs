@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Input;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System;
@@ -14,8 +15,16 @@ public partial class MainWindow : Window
         DataContext = new MainWindowViewModel();
     }
 
-    private void Button_Click(object? sender, RoutedEventArgs e)
+    private void Connect_Click(object? sender, RoutedEventArgs e)
     {
         (DataContext as MainWindowViewModel)?.OnButtonPressed();
+    }
+    private void OnDragWindow(object? sender, PointerPressedEventArgs e)
+    {
+        BeginMoveDrag(e);
+    }
+    private void OnCloseClicked(object? sender, RoutedEventArgs e)
+    {
+        Close();
     }
 }
