@@ -7,14 +7,16 @@
         x:Class="client_ui.MainWindow"
         Title="client_ui"
         CanResize="False"
-        WindowDecorations ="BorderOnly"
-        Width="610" Height="120">
-    <Border BorderBrush="Gray" BorderThickness="0,8,0,0" Padding = "3" PointerPressed="OnDragWindow">
+        WindowDecorations ="None"
+        Width="610" Height="128">
+    <Border BorderBrush="#1B1E26" BorderThickness="0,8,0,8" Padding = "3" PointerPressed="OnDragWindow">
         <StackPanel Orientation="Vertical">
 
             <Grid>
                 <TextBlock Text="FILE  SHARING  APP" FontSize="35" LetterSpacing="6" FontFamily="{StaticResource BebasNeue}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,15"/>
-                <Button Content="X" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Top" Click="OnCloseClicked" Background="Purple"/>
+                <Button Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Top" Click="OnCloseClicked" Background="Purple">
+                    <TextBlock Text="X" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                </Button>
             </Grid>
 
             <StackPanel Orientation="Horizontal" Spacing="2" Margin="0,0,0,0">
@@ -23,7 +25,7 @@
                 <TextBox Height="25" Width="200" PlaceholderText="Enter your IP address" Text="{Binding IpAddress, Mode=TwoWay}"/>
                 <TextBlock Width="35" Margin="7.5,0,0,0" VerticalAlignment="Center">Port:</TextBlock>
                 <TextBox Height="25" Width="200" PlaceholderText="Enter your port number" Text="{Binding PortNumber, Mode=TwoWay}"/>
-                <Button Margin="16,0,0,0" Content="Connect" Click="Connect_Click" Background="Purple"/>
+                <Button Margin="22,0,0,0" Content="Connect" Click="Connect_Click" Background="Purple"/>
                 
             </StackPanel>
         </StackPanel>
