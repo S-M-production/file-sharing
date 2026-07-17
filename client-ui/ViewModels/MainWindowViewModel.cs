@@ -26,7 +26,7 @@ public class MainWindowViewModel : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _portNumber, value);
     }
 
-    public void OnButtonPressed()
+    public async Task OnButtonPressed()
     {
 
         Console.WriteLine("Button Pressed!");
@@ -51,7 +51,7 @@ public class MainWindowViewModel : ReactiveObject
             return;
         }
 
-        Connection? connection = connector.Connect().Result;
+        Connection? connection = await connector.Connect();
         if(connection == null)
         {
             Console.WriteLine("Not connected");
