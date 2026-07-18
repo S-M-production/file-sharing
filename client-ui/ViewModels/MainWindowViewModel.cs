@@ -13,7 +13,7 @@ public class MainWindowViewModel : ReactiveObject
     
     private string _ipAddress = "";
     private string _portNumber = "";
-
+    
     public string IpAddress
     {
         get => _ipAddress;
@@ -28,36 +28,35 @@ public class MainWindowViewModel : ReactiveObject
 
     public async Task OnButtonPressed()
     {
-
         Console.WriteLine("Button Pressed!");
-
-        if (int.TryParse(PortNumber, out var port))
-        {
-            Console.WriteLine($"IP: {IpAddress}, Port: {port}");
-        }
-        else
-        {
-            Console.WriteLine($"IP: {IpAddress}, Port: invalid ({PortNumber})");
-        }
-
-        Connector connector;
+        int port;
         try
         {
-            connector = new Connector(IpAddress, int.Parse(PortNumber), LoggerSingleton.Instance._instance);
+            port = int.Parse(PortNumber);
+            Console.WriteLine($"IP: {IpAddress}, Port: {port}");
         }
         catch (Exception e)
         {
-            LoggerSingleton.Instance._instance.LogError(e, "Failed to connect to server");
-            return;
-        }
-
-        Connection? connection = await connector.Connect();
-        if(connection == null)
-        {
-            Console.WriteLine("Not connected");
+            Console.WriteLine($"IP: {IpAddress}, Port: invalid ({PortNumber})");
             return;
         }
         
-        Console.WriteLine($"Lifetime: {Application.Current?.ApplicationLifetime?.GetType().Name}");
+        Connection connection;
+        try
+        {
+            connection = await Connector.Connect(IpAddress, port, LoggerSingleton._instance);
+        }
+        catch (TimeoutException e)
+        {
+            LoggerSingleton._instance.LogError("Timed out of server connection {}", e.Message);
+            return;
+        }
+        catch (Exception e)
+        {
+            LoggerSingleton._instance.LogError("Connecting to invalid server {}",e.Message);
+            return;
+        }
+        LoggerSingleton._instance.LogInformation("Connected to server!!!");
+        LoggerSingleton._instance.LogInformation("Lifetime: {Name}", Application.Current?.ApplicationLifetime?.GetType().Name);
     }
 }
