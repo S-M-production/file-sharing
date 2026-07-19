@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <TargetFramework>net10.0</TargetFramework>
         <RootNamespace>server_core_test</RootNamespace>
         <LangVersion>latest</LangVersion>

@@ -1,0 +1,30 @@
+### YamlMime:ManagedReference
+items:
+- uid: server_core.core
+  commentId: N:server_core.core
+  id: server_core.core
+  children:
+  - server_core.core.Listener
+  - server_core.core.Worker
+  langs:
+  - csharp
+  - vb
+  name: server_core.core
+  nameWithType: server_core.core
+  fullName: server_core.core
+  type: Namespace
+  assemblies:
+  - server-core
+references:
+- uid: server_core.core.Listener
+  commentId: T:server_core.core.Listener
+  href: server_core.core.Listener.html
+  name: Listener
+  nameWithType: Listener
+  fullName: server_core.core.Listener
+- uid: server_core.core.Worker
+  commentId: T:server_core.core.Worker
+  href: server_core.core.Worker.html
+  name: Worker
+  nameWithType: Worker
+  fullName: server_core.core.Worker

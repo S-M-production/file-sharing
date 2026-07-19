@@ -1,0 +1,523 @@
+{
+  "source_base_path": "/home/munna-01/RiderProjects/file-share-solution",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Resource",
+      "output": {
+        "resource": {
+          "relative_path": "index.json"
+        }
+      }
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_core.Program.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_core.Program.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_core.Program",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_core.core.Connection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_core.core.Connection.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_core.core.Connection",
+      "Summary": "<p sourcefile=\"api/client_core.core.Connection.yml\" sourcestartlinenumber=\"1\">Class that houses the reader and writer for a connection</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_core.core.Connector.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_core.core.Connector.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_core.core.Connector",
+      "Summary": "<p sourcefile=\"api/client_core.core.Connector.yml\" sourcestartlinenumber=\"1\">Class has static objests as connector doesnt require object lifecycle as it only server purpose of validating and returning a connection to a server</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_core.core.HeartBeat.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_core.core.HeartBeat.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_core.core.HeartBeat",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_core.core.Listener.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_core.core.Listener.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_core.core.Listener",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_core.core.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_core.core.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_core.core",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_core.middleware.Middleware.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_core.middleware.Middleware.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_core.middleware.Middleware",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_core.middleware.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_core.middleware.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_core.middleware",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_core.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_core.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_core",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_ui.App.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_ui.App.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_ui.App",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_ui.LoggerSingleton.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_ui.LoggerSingleton.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_ui.LoggerSingleton",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_ui.MainWindow.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_ui.MainWindow.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_ui.MainWindow",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_ui.ViewModels.MainWindowViewModel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_ui.ViewModels.MainWindowViewModel.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_ui.ViewModels.MainWindowViewModel",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_ui.ViewModels.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_ui.ViewModels.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_ui.ViewModels",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/client_ui.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/client_ui.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "client_ui",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/format.core.MessageType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/format.core.MessageType.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "format.core.MessageType",
+      "Summary": "<p sourcefile=\"api/format.core.MessageType.yml\" sourcestartlinenumber=\"1\">Enums representing the types of messages sent in the protocol</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/format.core.Parser.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/format.core.Parser.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "format.core.Parser",
+      "Summary": "<p sourcefile=\"api/format.core.Parser.yml\" sourcestartlinenumber=\"1\">Class to parse a networks stream for incoming packets that follow custom protocol</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/format.core.ProtocolMessage.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/format.core.ProtocolMessage.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "format.core.ProtocolMessage",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/format.core.ProtocolSerializer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/format.core.ProtocolSerializer.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "format.core.ProtocolSerializer",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/format.core.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/format.core.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "format.core",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/format.formatTest.ParserTest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/format.formatTest.ParserTest.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "format.formatTest.ParserTest",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/format.formatTest.ThreadSafeHassetTest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/format.formatTest.ThreadSafeHassetTest.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "format.formatTest.ThreadSafeHassetTest",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/format.formatTest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/format.formatTest.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "format.formatTest",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/server_core.Program.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/server_core.Program.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "server_core.Program",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/server_core.core.Listener.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/server_core.core.Listener.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "server_core.core.Listener",
+      "Summary": "<p sourcefile=\"api/server_core.core.Listener.yml\" sourcestartlinenumber=\"1\">Listens for connections and spawns workers for each connection</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/server_core.core.Worker.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/server_core.core.Worker.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "server_core.core.Worker",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/server_core.core.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/server_core.core.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "server_core.core",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/server_core.logic.ThreadSafeHasset.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/server_core.logic.ThreadSafeHasset.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "server_core.logic.ThreadSafeHasset",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/server_core.logic.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/server_core.logic.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "server_core.logic",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/server_core.middleware.Middleware.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/server_core.middleware.Middleware.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "server_core.middleware.Middleware",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/server_core.middleware.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/server_core.middleware.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "server_core.middleware",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/server_core.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/server_core.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "server_core",
+      "Summary": null
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".json": {
+          "relative_path": "api/toc.json"
+        },
+        ".html": {
+          "relative_path": "api/toc.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "getting-started.md",
+      "output": {
+        ".html": {
+          "relative_path": "getting-started.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "introduction.md",
+      "output": {
+        ".html": {
+          "relative_path": "introduction.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".json": {
+          "relative_path": "toc.json"
+        },
+        ".html": {
+          "relative_path": "toc.html"
+        }
+      },
+      "version": ""
+    }
+  ],
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+### YamlMime:ManagedReference
+items:
+- uid: client_core
+  commentId: N:client_core
+  id: client_core
+  children:
+  - client_core.Program
+  langs:
+  - csharp
+  - vb
+  name: client_core
+  nameWithType: client_core
+  fullName: client_core
+  type: Namespace
+  assemblies:
+  - client-core
+references:
+- uid: client_core.Program
+  commentId: T:client_core.Program
+  href: client_core.Program.html
+  name: Program
+  nameWithType: Program
+  fullName: client_core.Program

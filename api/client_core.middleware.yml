@@ -1,0 +1,23 @@
+### YamlMime:ManagedReference
+items:
+- uid: client_core.middleware
+  commentId: N:client_core.middleware
+  id: client_core.middleware
+  children:
+  - client_core.middleware.Middleware
+  langs:
+  - csharp
+  - vb
+  name: client_core.middleware
+  nameWithType: client_core.middleware
+  fullName: client_core.middleware
+  type: Namespace
+  assemblies:
+  - client-core
+references:
+- uid: client_core.middleware.Middleware
+  commentId: T:client_core.middleware.Middleware
+  href: client_core.middleware.Middleware.html
+  name: Middleware
+  nameWithType: Middleware
+  fullName: client_core.middleware.Middleware

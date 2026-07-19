@@ -1,0 +1,37 @@
+### YamlMime:ManagedReference
+items:
+- uid: client_ui
+  commentId: N:client_ui
+  id: client_ui
+  children:
+  - client_ui.App
+  - client_ui.LoggerSingleton
+  - client_ui.MainWindow
+  langs:
+  - csharp
+  - vb
+  name: client_ui
+  nameWithType: client_ui
+  fullName: client_ui
+  type: Namespace
+  assemblies:
+  - client-ui
+references:
+- uid: client_ui.App
+  commentId: T:client_ui.App
+  href: client_ui.App.html
+  name: App
+  nameWithType: App
+  fullName: client_ui.App
+- uid: client_ui.LoggerSingleton
+  commentId: T:client_ui.LoggerSingleton
+  href: client_ui.LoggerSingleton.html
+  name: LoggerSingleton
+  nameWithType: LoggerSingleton
+  fullName: client_ui.LoggerSingleton
+- uid: client_ui.MainWindow
+  commentId: T:client_ui.MainWindow
+  href: client_ui.MainWindow.html
+  name: MainWindow
+  nameWithType: MainWindow
+  fullName: client_ui.MainWindow

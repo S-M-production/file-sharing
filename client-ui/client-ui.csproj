@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <OutputType>Exe</OutputType>
         <RootNamespace>client_ui</RootNamespace>
         <TargetFramework>net10.0</TargetFramework>
