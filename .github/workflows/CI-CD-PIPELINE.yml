@@ -41,6 +41,8 @@ jobs:
       run: dotnet test $Server_Core_Test_Project_Path
       
   build:
+    environment:
+      name: Production
     runs-on: ubuntu-26.04 
     steps:
      # Install docker stuff
@@ -74,6 +76,8 @@ jobs:
           munna00/file-sharing-server:${{ github.sha }} 
           
   deploy:
+    environment:
+        name: Production
     needs: [test,build]
     runs-on: ubuntu-26.04  
     steps:
