@@ -2,10 +2,9 @@ using System.Text;
 
 namespace format.core;
 
-public class ProtocolSerializer
+public static class ProtocolSerializer
 {
-    private const string sig = "CNSR";
-    
+    private const string Sig = "CNSR";
     public static byte[] Serialize(MessageType type, string message)
     {
         return  BuildMessage(type,System.Text.Encoding.UTF8.GetBytes(message)); 
@@ -20,30 +19,38 @@ public class ProtocolSerializer
     {
         return BuildMessage(protocolMessage.MessageType, protocolMessage.Body);
     }
-
-    public static String ReadableSerialize(ProtocolMessage protocolMessage)
+    /// <summary>
+    /// Serializes the protocol message into a readable format (String)
+    /// </summary>
+    /// <param name="protocolMessage">Takes in protocolMessage to parse</param>
+    /// <returns>Returns a string with all headers/body in UTF-8</returns>
+    public static string ReadableSerialize(ProtocolMessage protocolMessage)
     {
         StringBuilder sb = new StringBuilder();
         sb.Append("CNSR");
         sb.Append(" ");
         sb.Append(protocolMessage.MessageType.ToString());
+
+        if (protocolMessage.Length == 0) return sb.ToString();
         
-        if (protocolMessage.Length != 0)
-        {
-            sb.Append(" ");
-            sb.Append(protocolMessage.Length);
-            sb.Append(" ");
-            sb.Append(System.Text.Encoding.UTF8.GetString(protocolMessage.Body));    
-        }
-        
+        sb.Append(" ");
+        sb.Append(protocolMessage.Length);
+        sb.Append(" ");
+        sb.Append(System.Text.Encoding.UTF8.GetString(protocolMessage.Body));
+
         return sb.ToString();
     }
     
-    // Converts a MessageType into a 4-byte header
-    private static byte[] BuildHeader(MessageType type,Int32 messageLength) // eventually it would make sense to have it as a private class instead of a public class
+    /// <summary>
+    /// Creates header from Message type and length of message
+    /// </summary>
+    /// <param name="type">Type of protocol message</param>
+    /// <param name="messageLength">Length of body</param>
+    /// <returns>Returns byte[] of header</returns>
+    private static byte[] BuildHeader(MessageType type,Int32 messageLength) 
     {
-        // Implementation goes here
-        byte[] sigByte = System.Text.Encoding.UTF8.GetBytes(sig);
+
+        byte[] sigByte = System.Text.Encoding.UTF8.GetBytes(Sig);
         byte[] messageTypeBytes = BitConverter.GetBytes((Int32)type);
         byte[] lengthBytes = BitConverter.GetBytes((Int32)messageLength);
 
@@ -54,10 +61,16 @@ public class ProtocolSerializer
         
         return buffer.ToArray();
     }
-    // Combines header + payload into one message
+    
+    /// <summary>
+    /// Creates message (byte[]) from type of message and body
+    /// </summary>
+    /// <param name="type">Type of message from protocol format</param>
+    /// <param name="message">Message encoded in UTF-8</param>
+    /// <returns>returns byte[] of message</returns>
     private static byte[] BuildMessage(MessageType type, byte[] message)
     {
-        // Implementation goes here
+    
         byte[] byteHeader = BuildHeader(type,message.Length);
         byte[] byteMessage = new byte[byteHeader.Length + message.Length];
 

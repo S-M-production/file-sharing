@@ -6,11 +6,15 @@ namespace server_core;
 
 public class Program
 {
-    static IPAddress? address;
-    static Int32 port;
-    public static void Main(string[] args)
+    private static IPAddress? _address;
+    private static int _port;
+    /// <summary>
+    /// Entrypoint for server
+    /// </summary>
+    /// <param name="args">takes args "'ip' 'port'"</param>
+    public static async Task Main(string[] args)
     {
-        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+        using var factory = LoggerFactory.Create(builder => builder.AddConsole());
         ILogger logger = factory.CreateLogger<Program>();
 
         if (args.Length != 2)
@@ -21,17 +25,17 @@ public class Program
 
         try
         {
-            address = IPAddress.Parse(args[0]);
-            port = Int32.Parse(args[1]);    
+            _address = IPAddress.Parse(args[0]);
+            _port = int.Parse(args[1]);    
         }catch (Exception e){
-            logger.LogError("\nPlease input \'ip adress\' \'port\'");
+            logger.LogError("\nPlease input \'ip address\' \'port\'");
             return;
         }
 
         logger.LogInformation("Inputs are valid");
     
-        Listener listener = new Listener(address,port, logger);
-        Task listenerInstance = listener.Run();
-        while(true){continue;}
+        var listener = new Listener(_address,_port, logger);
+        _ = listener.Run();
+        await Task.Delay(Timeout.Infinite);
     }
 }

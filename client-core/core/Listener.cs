@@ -3,47 +3,69 @@ using System.Net.Sockets;
 using format.core;
 using Microsoft.Extensions.Logging;
 
-namespace client_core.core
+namespace client_core.core;
+public class Listener
 {
-
-    public class Listener(TcpClient tcpClient, ILogger logger)
+    private readonly ILogger _logger;
+    private readonly IPAddress _clientAddress;
+    private readonly int _clientPort;
+    private readonly NetworkStream _stream;
+    private readonly Parser _parser;
+    private Connection _connection;
+    /// <summary>
+    /// Creates NetworkStream and  saves logger, IP, and port
+    /// </summary>
+    /// <param name="tcpClient">TcpClient of connection to valid server</param>
+    /// <param name="connection">A connection object for writing to client</param>
+    /// <exception cref="IOException">When an improper TcpClient is inputted, one that doesn't return IP:PORT</exception>
+    public Listener(TcpClient tcpClient, ILogger logger,Connection connection)
     {
-        private byte[]? _body;
-        private IPAddress clientAddress;
-        private int clientPort;
-        public async Task Run()
-        {
-            IPEndPoint clientInfo = tcpClient.Client.RemoteEndPoint as IPEndPoint;
-            clientAddress = clientInfo.Address.MapToIPv4();
-            clientPort = clientInfo.Port;
-            
-            await using var stream = tcpClient.GetStream();
-            
-            ProtocolMessage message;
-            var parser = new Parser(stream);
+        this._logger = logger;
+        this._connection = connection;
+        
+        IPEndPoint? clientInfo = tcpClient.Client.RemoteEndPoint as IPEndPoint;
+        if (clientInfo == null) throw new IOException("Improper Connection???");
+        
+        _clientAddress = clientInfo.Address.MapToIPv4();
+        _clientPort = clientInfo.Port;
 
-            while (true)
+        _stream = tcpClient.GetStream();
+        _parser = new Parser(_stream);
+    }
+    /// <summary>
+    /// Runs a listening loop 
+    /// </summary>
+    /// <remarks>
+    /// Async loop that waits for a request from server
+    /// Parses it
+    /// If issue happens while parsing then its disconnected
+    /// Message is passed through middle ware, and response is created and sent to connection
+    /// </remarks>
+    public async Task Run()
+    {
+        while (true)
+        {
+            ProtocolMessage message;
+            try
             {
-                try
-                {
-                    message = await parser.Parse();
-                }catch (IOException e)
-                {
-                    logger.LogWarning("Issue handling... disconnection {}:{}",clientAddress,clientPort);
-                    logger.LogTrace(e.StackTrace);
-                    return;
-                }
-            
-                logger.LogInformation("Got message: {} {}:{}",ProtocolSerializer.ReadableSerialize(message),clientAddress,clientPort);
-            
-                //TODO: Create routing layer and create middleware
-                ProtocolMessage? response = middleware.Middleware.GetResponse(message);
-            
-                if (response == null)  continue;
-            
-                await stream.WriteAsync(ProtocolSerializer.Serialize(response));  
+                message = await _parser.Parse();
             }
-            
+            catch (IOException e)
+            {
+                _logger.LogTrace("Issue handling... Disconnecting {Address}:{Port} \n{Error}",_clientAddress,_clientPort,e.StackTrace);
+                _stream?.Close();
+                return;
+            }
+        
+            _logger.LogInformation("Got message: {} {}:{}",ProtocolSerializer.ReadableSerialize(message),_clientAddress,_clientPort);
+        
+            //TODO: Create routing layer and create middleware
+            ProtocolMessage? response = middleware.Middleware.GetResponse(message);
+        
+            if (response == null)  continue;
+        
+            await _stream.WriteAsync(ProtocolSerializer.Serialize(response));  
         }
+        
     }
 }

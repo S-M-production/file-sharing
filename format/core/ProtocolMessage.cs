@@ -1,12 +1,10 @@
-namespace format.core
+namespace format.core;
+public record ProtocolMessage(MessageType MessageType, byte[] Body)
 {
-    public record ProtocolMessage(MessageType MessageType, byte[] Body)
-    {
-        public int Length => Body.Length;
+    public int Length => Body.Length;
 
-        public ProtocolMessage(MessageType messageType)
-            : this(messageType, [])
-        {
-        }
-    }    
-}
+    public ProtocolMessage(MessageType messageType)
+        : this(messageType, [])
+    {
+    }
+}    

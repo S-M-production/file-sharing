@@ -3,42 +3,34 @@ using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
 using server_core.logic;
 
-namespace server_core.core
+namespace server_core.core;
+/// <summary>
+/// Listens for connections and spawns workers for each connection
+/// </summary>
+public class Listener(IPAddress address, int port, ILogger logger)
 {
-    public class Listener
+    private readonly TcpListener _tcpListener = new(address, port);
+    /// <summary>
+    /// Starts listening and spawns a worker per client connection
+    /// </summary>
+    public async Task Run()
     {
-        private readonly IPAddress address;
-        private readonly int port;
-        private readonly TcpListener tcpListener;
-        private readonly ILogger logger;
+        _tcpListener.Start();
 
-        public Listener(IPAddress address, int port, ILogger logger)
+        logger.LogInformation("Started listening on {Address}:{Port}", address, port);
+
+        var connections = new ThreadSafeHasset();
+        
+        while(true)
         {
-            this.address = address;
-            this.port = port;
-            this.logger = logger;
-            this.tcpListener = new TcpListener(address, port);
-        }
-
-        public async Task Run()
-        {
-            tcpListener.Start();
-
-            logger.LogInformation("Started listening on {Address}:{Port}", address, port);
-
-            var connections = new ThreadSafeHasset();
+            var client = await _tcpListener.AcceptTcpClientAsync();
             
-            while(true)
-            {
-                var client = await tcpListener.AcceptTcpClientAsync();
-                
-                logger.LogInformation(
-                    "Client connected: {Client}",
-                    client.Client.RemoteEndPoint);
+            logger.LogInformation(
+                "Client connected: {Client}",
+                client.Client.RemoteEndPoint);
 
-                Worker worker = new Worker(client,logger, connections);
-                Task workerInstance = worker.Run();
-            }
+            Worker worker = new Worker(client,logger, connections);
+            _ = worker.Run();
         }
     }
 }

@@ -4,21 +4,27 @@ namespace client_core.core;
 
 public class HeartBeat
 {
-    private double _heartBeatInterval = 10; //Seconds
-    Connection connection;
-    Task heartBeatTask;
+    private const double HeartBeatInterval = 10; //Seconds
+    private readonly Connection _connection;
+    private Task _heartBeatTask;
+    /// <summary>
+    /// Sets up heartbeat loop
+    /// </summary>
+    /// <param name="connection">Connection object representing a connection to valid server</param>
     public HeartBeat(Connection connection)
     {
-        this.connection = connection;
-        heartBeatTask = HeartBeatLoop();
+        this._connection = connection;
+        _heartBeatTask = HeartBeatLoop();
     }
-
+    /// <summary>
+    /// Sends a heartbeat Ping message every few HeartBeatInterval seconds
+    /// </summary>
     private async Task HeartBeatLoop()
     {
         while (true)
         {
-            await Task.Delay((int)(_heartBeatInterval*1000));
-            await connection.AddTask(new ProtocolMessage(MessageType.Ping));
+            await Task.Delay((int)(HeartBeatInterval*1000));
+            await _connection.AddTask(new ProtocolMessage(MessageType.Ping));
         }
     }
 }

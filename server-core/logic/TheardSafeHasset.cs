@@ -5,7 +5,7 @@ namespace server_core.logic;
 public class ThreadSafeHasset
 {
     private readonly HashSet<string> _connections = new HashSet<string>();
-    private readonly object _lock = new object();
+    private readonly Lock _lock = new Lock();
 
     public bool Add(string ipPort)
     {
