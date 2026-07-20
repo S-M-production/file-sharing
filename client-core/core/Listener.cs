@@ -1,9 +1,13 @@
 using System.Net;
 using System.Net.Sockets;
+using client_core.router;
 using format.core;
 using Microsoft.Extensions.Logging;
 
 namespace client_core.core;
+/// <summary>
+/// Class that listens to one single valid connection and initiates request pipeline
+/// </summary>
 public class Listener
 {
     private readonly ILogger _logger;
@@ -12,10 +16,13 @@ public class Listener
     private readonly NetworkStream _stream;
     private readonly Parser _parser;
     private Connection _connection;
+    private RouterMap _routerMap;
+
     /// <summary>
     /// Creates NetworkStream and  saves logger, IP, and port
     /// </summary>
     /// <param name="tcpClient">TcpClient of connection to valid server</param>
+    /// <param name="logger">The logger passed down from initial project creation</param>
     /// <param name="connection">A connection object for writing to client</param>
     /// <exception cref="IOException">When an improper TcpClient is inputted, one that doesn't return IP:PORT</exception>
     public Listener(TcpClient tcpClient, ILogger logger,Connection connection)
@@ -31,6 +38,7 @@ public class Listener
 
         _stream = tcpClient.GetStream();
         _parser = new Parser(_stream);
+        _routerMap = new RouterMap();
     }
     /// <summary>
     /// Runs a listening loop 
@@ -60,7 +68,7 @@ public class Listener
             _logger.LogInformation("Got message: {} {}:{}",ProtocolSerializer.ReadableSerialize(message),_clientAddress,_clientPort);
         
             //TODO: Create routing layer and create middleware
-            ProtocolMessage? response = middleware.Middleware.GetResponse(message);
+            ProtocolMessage? response = middleware.Middleware.GetResponse(message,_routerMap);
         
             if (response == null)  continue;
         
