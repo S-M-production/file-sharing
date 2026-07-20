@@ -7,24 +7,51 @@
         CanResize="False"
         Width="610" Height="320"
         WindowDecorations ="None">
-    <Border BorderBrush="#1B1E26" BorderThickness="0,8,0,0" Padding = "3" PointerPressed="OnDragWindow">
+    <Border BorderBrush="#575757" BorderThickness="0,4,0,0" Padding = "3" PointerPressed="OnDragWindow">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
             <ListBox 
                 ItemsSource="{Binding RemotePeers}"
-                Width = "580"
-                Height = "220"
-                ScrollViewer.VerticalScrollBarVisibility = "Auto">
+                Width="580"
+                Height="220"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                Padding="0"
+                Margin="0"
+                Background="Transparent">
+                 <ListBox.ItemContainerTheme>
+                    <ControlTheme TargetType="ListBoxItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                    </ControlTheme>
+                </ListBox.ItemContainerTheme>
+
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="0" Margin="0"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+
                 <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="vm:Row">
-                        <Border BorderBrush="#888" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,4">
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="4">
-                                <TextBlock Text="{Binding Ip}" FontWeight="Bold" />
-                                <TextBlock Grid.Row="1" Text="{Binding Port}" />
-                                <Button Grid.Column="1" Grid.RowSpan="2"
-                                    Content="Request Connect"
-                                    Command="{Binding RequestConnectCommand}"
-                                    Margin="10,0,0,0"
-                                    VerticalAlignment="Center"/>
+                        <Border Background="#ffffff" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0">
+                            <Grid ColumnDefinitions="Auto,Auto,*" RowDefinitions="Auto" RowSpacing="4">
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding Ip, StringFormat='IP:  {0}'}"
+                                           Foreground="#000000" />
+
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding Port, StringFormat='Port:  {0}'}"
+                                           Margin="8,0,0,0"
+                                           Foreground="#000000" />
+
+                                <Button Grid.Column="2"
+                                        HorizontalAlignment="Right"
+                                        Content="Request Connect"
+                                        Command="{Binding RequestConnectCommand}"
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Background="Purple"
+                                        Foreground="#000000"/>
                             </Grid>
                         </Border>
                     </DataTemplate>

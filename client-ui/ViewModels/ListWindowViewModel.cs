@@ -42,7 +42,15 @@ public class Row
         Port = port;
         RequestConnectCommand = ReactiveCommand.Create(() =>
         {
-            Console.WriteLine($"Requesting connection to {ip}:{port}");
+            try
+            {
+                Console.WriteLine($"Requesting connection to {ip}:{port}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Row command exception" + ex);
+                throw;
+            }
         });
     }
 }
