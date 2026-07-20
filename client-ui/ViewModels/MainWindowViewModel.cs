@@ -3,7 +3,6 @@ using Avalonia;
 using ReactiveUI;
 using Microsoft.Extensions.Logging;
 using client_core.core;
-using client_ui;
 using System.Threading.Tasks;
 
 namespace client_ui.ViewModels;

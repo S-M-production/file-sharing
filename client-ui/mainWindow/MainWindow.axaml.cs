@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System;
 using client_ui.ViewModels;
+using System.Security.Cryptography.X509Certificates;
 
 namespace client_ui;
 
@@ -22,7 +23,16 @@ public partial class MainWindow : Window
 
         if (success)
         {
+            var listWindowViewModel = new ListWindowViewModel();
+            listWindowViewModel.RefreshList(new[]
+            {
+                "192.168.1.10:8000",
+                "10.0.0.5:9000",
+                "127.0.0.1:1234"
+            });
+            
             var listWindow = new ListWindow();
+            listWindow.DataContext = listWindowViewModel;
 
             listWindow.WindowStartupLocation = WindowStartupLocation.Manual;
             listWindow.Position = this.Position;
