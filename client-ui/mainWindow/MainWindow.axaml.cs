@@ -15,9 +15,21 @@ public partial class MainWindow : Window
         DataContext = new MainWindowViewModel();
     }
 
-    private void Connect_Click(object? sender, RoutedEventArgs e)
+    private async void Connect_Click(object? sender, RoutedEventArgs e)
     {
-        (DataContext as MainWindowViewModel)?.OnButtonPressed();
+        var viewModel = DataContext as MainWindowViewModel;
+        var success = await viewModel!.OnButtonPressed();
+
+        if (success)
+        {
+            var listWindow = new ListWindow();
+
+            listWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+            listWindow.Position = this.Position;
+
+            listWindow.Show();
+            this.Close();
+        }
     }
     private void OnDragWindow(object? sender, PointerPressedEventArgs e)
     {

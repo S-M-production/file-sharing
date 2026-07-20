@@ -9,7 +9,7 @@
         CanResize="False"
         WindowDecorations ="None"
         Width="610" Height="128">
-    <Border BorderBrush="#1B1E26" BorderThickness="0,8,0,8" Padding = "3" PointerPressed="OnDragWindow">
+    <Border BorderBrush="#1B1E26" BorderThickness="0,8,0,0" Padding = "3" PointerPressed="OnDragWindow">
         <StackPanel Orientation="Vertical">
 
             <Grid>

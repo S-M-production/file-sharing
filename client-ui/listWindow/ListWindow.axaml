@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:DataType="vm:ListWindowViewModel"
+        x:Class="client_ui.ListWindow"
+        Title="List Window"
+        CanResize="False"
+        Width="610" Height="128"
+        WindowDecorations ="None">
+    <Border BorderBrush="#1B1E26" BorderThickness="0,8,0,0" Padding = "3" PointerPressed="OnDragWindow">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="Connected" FontSize="24"/>
+        </StackPanel>
+    </Border>
+
+
+
+
+
+
+
+
+</Window>

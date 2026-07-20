@@ -26,7 +26,7 @@ public class MainWindowViewModel : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _portNumber, value);
     }
 
-    public async Task OnButtonPressed()
+    public async Task<bool> OnButtonPressed()
     {
         Console.WriteLine("Button Pressed!");
         int port;
@@ -38,7 +38,7 @@ public class MainWindowViewModel : ReactiveObject
         catch (Exception e)
         {
             Console.WriteLine($"IP: {IpAddress}, Port: invalid ({PortNumber})");
-            return;
+            return false;
         }
         
         Connection connection;
@@ -49,14 +49,15 @@ public class MainWindowViewModel : ReactiveObject
         catch (TimeoutException e)
         {
             LoggerSingleton._instance.LogError("Timed out of server connection {}", e.Message);
-            return;
+            return false;
         }
         catch (Exception e)
         {
             LoggerSingleton._instance.LogError("Connecting to invalid server {}",e.Message);
-            return;
+            return false;
         }
         LoggerSingleton._instance.LogInformation("Connected to server!!!");
         LoggerSingleton._instance.LogInformation("Lifetime: {Name}", Application.Current?.ApplicationLifetime?.GetType().Name);
+        return true;
     }
 }
