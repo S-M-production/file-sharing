@@ -28,7 +28,7 @@ public partial class MainWindow : Window
             {
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    var listWindowViewModel = new ListWindowViewModel();
+                    var listWindowViewModel = new ListWindowViewModel(viewModel.ActiveConnection);
                     listWindowViewModel.RefreshList(new[]
                     {
                         "192.168.1.10:8000",

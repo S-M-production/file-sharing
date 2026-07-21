@@ -12,6 +12,7 @@ public class MainWindowViewModel : ReactiveObject
     
     private string _ipAddress = "";
     private string _portNumber = "";
+    private Connection? _connection;
     
     public string IpAddress
     {
@@ -23,6 +24,12 @@ public class MainWindowViewModel : ReactiveObject
     {
         get => _portNumber;
         set => this.RaiseAndSetIfChanged(ref _portNumber, value);
+    }
+
+    public Connection? ActiveConnection
+    {
+        get => _connection;
+        private set => this.RaiseAndSetIfChanged(ref _connection, value);
     }
 
     public async Task<bool> OnButtonPressed()
@@ -40,10 +47,11 @@ public class MainWindowViewModel : ReactiveObject
             return false;
         }
         
-        Connection connection;
+        
         try
         {
-            connection = await Connector.Connect(IpAddress, port, LoggerSingleton._instance);
+            var connection = await Connector.Connect(IpAddress, port, LoggerSingleton._instance);
+            ActiveConnection = connection;
         }
         catch (TimeoutException e)
         {

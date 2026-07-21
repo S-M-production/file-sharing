@@ -46,7 +46,7 @@
 
                                 <Button Grid.Column="2"
                                         HorizontalAlignment="Right"
-                                        Content="Request Connect"
+                                        Content="{Binding ButtonText}"
                                         Command="{Binding RequestConnectCommand}"
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
