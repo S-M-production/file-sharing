@@ -7,7 +7,7 @@ public enum MessageType : int
     /// <summary>
     /// Request to connect to server, for now contains no body
     /// </summary>
-    Connect, 
+    Connect,
     /// <summary>
     /// Request to get full user list from server, for now contains no body
     /// </summary>
