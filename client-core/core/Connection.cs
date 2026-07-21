@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Channels;
+using client_core.router;
 using format.core;
 using Microsoft.Extensions.Logging;
 
@@ -23,6 +24,7 @@ public class Connection
     private ILogger logger;
     private IPAddress clientAddress;
     private int clientPort;
+    public RouterMap RouterMap { get; } = new RouterMap();
     /// <summary>
     /// Sets up listening and writing loop for the connection
     /// </summary>
@@ -37,7 +39,7 @@ public class Connection
         
         this.client = client;
         networkStream = client.GetStream();
-        listenerTask = new Listener(client,logger,this).Run();
+        listenerTask = new Listener(client,logger,this,RouterMap).Run();
         asyncLoopTask = StartAsyncWriteLoop();
         heartBeat = new HeartBeat(this);
         this.logger = logger;
