@@ -14,21 +14,21 @@ public class RouterMap
     /// Adding a route to the dict
     /// </summary>
     /// <param name="type">The type the listener should respond to</param>
-    /// <param name="handle">The delegate that should be called</param>
+    /// <param name="messageHandler">The delegate that should be called</param>
     /// <param name="cap">The max amount of times the delegate can run before it is deleted</param>
     /// <param name="overwrite">If the current existing route should be overwritten or not</param>
     /// <returns>True if it could write it in, false if it couldn't</returns>
-    public bool AddRoute(MessageType type, Handle handle,int cap = -1, bool overwrite = false)
+    public bool AddRoute(MessageType type, MessageHandler messageHandler,int cap = -1, bool overwrite = false)
     {
         if (_map.TryGetValue(type, out HandleWrap? existing))
         {
             ValidateReplacement(type, existing, overwrite);
 
-            _map[type] = new HandleWrap(handle,cap);
+            _map[type] = new HandleWrap(messageHandler,cap);
             return true;
         }
 
-        return _map.TryAdd(type, new HandleWrap(handle,cap));
+        return _map.TryAdd(type, new HandleWrap(messageHandler,cap));
     }
     /// <summary>
     /// Validates whether replacement can happen or not
@@ -56,7 +56,7 @@ public class RouterMap
     /// <param name="handle">the handle that is returned</param>
     /// <returns>where the operation could or couldnt happen</returns>
     /// <exception cref="Exception"></exception>
-    public bool GetRoute(MessageType type, out Handle? handle)
+    public bool GetRoute(MessageType type, out MessageHandler? handle)
     {
         if (!_map.TryGetValue(type, out HandleWrap? wrap))
         {

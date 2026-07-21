@@ -6,7 +6,7 @@ namespace client_core.router;
 /// </summary>
 public class HandleWrap
 {
-    public Handle Handle { get; }
+    public MessageHandler MessageHandler { get; }
     /// <summary>
     /// -1 means unlimited.
     /// </summary>
@@ -29,17 +29,17 @@ public class HandleWrap
     /// </summary>
     /// <param name="handle">Handle that is given</param>
     /// <returns>Returns true if handle can be used, false if it cant be</returns>
-    public bool TryUse(out Handle? handle)
+    public bool TryUse(out MessageHandler? handle)
     {
         if (Cap == -1)
         {
-            handle = Handle;
+            handle = MessageHandler;
             return true;
         }
 
         if (Interlocked.Increment(ref _used) <= Cap)
         {
-            handle = Handle;
+            handle = MessageHandler;
             return true;
         }
 
@@ -50,9 +50,9 @@ public class HandleWrap
     /// <summary>
     /// Storing a handle with unlimited uses
     /// </summary>
-    public HandleWrap(Handle handle)
+    public HandleWrap(MessageHandler messageHandler)
     {
-        Handle = handle;
+        MessageHandler = messageHandler;
         Cap = -1;
         _used = 0;
     }
@@ -60,9 +60,9 @@ public class HandleWrap
     /// Storing a handle with limited uses
     /// </summary>
     /// <param name="cap">How many times you can use it</param>
-    public HandleWrap(Handle handle, int cap)
+    public HandleWrap(MessageHandler messageHandler, int cap)
     {
-        Handle = handle;
+        MessageHandler = messageHandler;
         Cap = cap;
         _used = 0;
     }
@@ -72,12 +72,12 @@ public class HandleWrap
     /// <remarks>
     /// IDK why I made this... maybe will be never used
     /// </remarks>
-    /// <param name="handle"></param>
+    /// <param name="messageHandler"></param>
     /// <param name="cap"></param>
     /// <param name="used"></param>
-    public HandleWrap(Handle handle, int cap, int used)
+    public HandleWrap(MessageHandler messageHandler, int cap, int used)
     {
-        Handle = handle;
+        MessageHandler = messageHandler;
         Cap = cap;
         _used = used;
     }
