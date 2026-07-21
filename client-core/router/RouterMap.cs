@@ -22,7 +22,7 @@ public class RouterMap
     {
         if (_map.TryGetValue(type, out HandleWrap? existing))
         {
-            ValidateReplacement(type, existing, overwrite);
+            if (!ValidateReplacement(type, existing, overwrite)) return false;
 
             _map[type] = new HandleWrap(messageHandler,cap);
             return true;
@@ -37,16 +37,15 @@ public class RouterMap
     /// <param name="existing">Takes HandleWrap that should be replaced</param>
     /// <param name="overwrite">If the exception should be written over without acknowledging expiration</param>
     /// <exception cref="Exception">Throws the exception if there is remaining uses left</exception>
-    private void ValidateReplacement(MessageType type, HandleWrap existing, bool overwrite)
+    private bool ValidateReplacement(MessageType type, HandleWrap existing, bool overwrite)
     {
         if (overwrite)
-            return;
+            return true;
 
         if (existing.IsExpired)
-            return;
+            return true;
 
-        throw new Exception(
-            $"Route '{type}' still has {existing.Cap - existing.Used} use(s) remaining.");
+        return false;
     }
 
     /// <summary>
@@ -54,7 +53,7 @@ public class RouterMap
     /// </summary>
     /// <param name="type">Type the route is assigned to</param>
     /// <param name="handle">the handle that is returned</param>
-    /// <returns>where the operation could or couldnt happen</returns>
+    /// <returns>where the operation could or couldn't happen</returns>
     /// <exception cref="Exception"></exception>
     public bool GetRoute(MessageType type, out MessageHandler? handle)
     {

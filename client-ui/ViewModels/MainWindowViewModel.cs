@@ -9,11 +9,11 @@ namespace client_ui.ViewModels;
 
 public class MainWindowViewModel : ReactiveObject
 {
-    
+
     private string _ipAddress = "";
     private string _portNumber = "";
     private Connection? _connection;
-    
+
     public string IpAddress
     {
         get => _ipAddress;
@@ -46,8 +46,8 @@ public class MainWindowViewModel : ReactiveObject
             Console.WriteLine($"IP: {IpAddress}, Port: invalid ({PortNumber})");
             return false;
         }
-        
-        
+
+
         try
         {
             var connection = await Connector.Connect(IpAddress, port, LoggerSingleton._instance);

@@ -16,7 +16,10 @@ public class Listener
     private readonly NetworkStream _stream;
     private readonly Parser _parser;
     private Connection _connection;
-    private RouterMap _routerMap;
+    /// <summary>
+    /// Router that belongs to one listening connection
+    /// </summary>
+    public RouterMap RouterMap { get; }
 
     /// <summary>
     /// Creates NetworkStream and  saves logger, IP, and port
@@ -24,8 +27,9 @@ public class Listener
     /// <param name="tcpClient">TcpClient of connection to valid server</param>
     /// <param name="logger">The logger passed down from initial project creation</param>
     /// <param name="connection">A connection object for writing to client</param>
+    /// <param name="routerMap">Router map the listener will use, needs to be passed in or else it cant be accessed outside</param>
     /// <exception cref="IOException">When an improper TcpClient is inputted, one that doesn't return IP:PORT</exception>
-    public Listener(TcpClient tcpClient, ILogger logger,Connection connection)
+    public Listener(TcpClient tcpClient, ILogger logger,Connection connection,RouterMap routerMap)
     {
         this._logger = logger;
         this._connection = connection;
@@ -38,7 +42,7 @@ public class Listener
 
         _stream = tcpClient.GetStream();
         _parser = new Parser(_stream);
-        _routerMap = new RouterMap();
+        RouterMap = routerMap;
     }
     /// <summary>
     /// Runs a listening loop 
@@ -68,7 +72,7 @@ public class Listener
             _logger.LogInformation("Got message: {} {}:{}",ProtocolSerializer.ReadableSerialize(message),_clientAddress,_clientPort);
         
             //TODO: Create routing layer and create middleware
-            ProtocolMessage? response = middleware.Middleware.GetResponse(message,_routerMap);
+            ProtocolMessage? response = middleware.Middleware.GetResponse(message,RouterMap);
         
             if (response == null)  continue;
         

@@ -7,9 +7,16 @@ namespace client_core.router.logic;
 
 public class UserListCallBack
 {
-    private MessageHandler UserListCall(ProtocolMessage message)
+    public TaskCompletionSource<ProtocolMessage> _awaitingMessage { get; }
+
+    public UserListCallBack()
     {
-        UserInfoList.GetUserInfoList(message,out var userInfos);
-        //TODO
+        _awaitingMessage = new TaskCompletionSource<ProtocolMessage>();
+    }
+    
+    public ProtocolMessage? UserListCall(ProtocolMessage incomingMessage)
+    {
+        _awaitingMessage!.SetResult(incomingMessage);
+        return null!;
     }
 }

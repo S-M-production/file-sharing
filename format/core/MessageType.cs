@@ -40,5 +40,9 @@ public enum MessageType : int
     /// <summary>
     /// Response back to client from ping, for now contains no body
     /// </summary>
-    Pong
+    Pong,
+    /// <summary>
+    /// For protocol message used within one program, contains body
+    /// </summary>
+    Internal
 }
