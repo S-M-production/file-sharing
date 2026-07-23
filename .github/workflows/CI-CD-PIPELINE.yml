@@ -67,6 +67,7 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v7
       with:
+        file: ./server.Dockerfile
         push: true
         platforms: |
           linux/amd64
