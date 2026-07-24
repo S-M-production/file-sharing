@@ -45,9 +45,6 @@ jobs:
       name: Production
     runs-on: ubuntu-26.04 
     steps:
-     # Install docker stuff
-    - name: Build and push Docker images
-      uses: docker/build-push-action@v7.3.0  
       
     #Sign into docker hub
     - name: Login to Docker Hub
