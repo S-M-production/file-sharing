@@ -11,6 +11,11 @@ jobs:
       name: Production
     runs-on: ubuntu-26.04 
     steps:
+    #Pulling the repo
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1 #Only need latest commit
      # Install docker stuff
     - name: Build and push Docker images
       uses: docker/build-push-action@v7.3.0  
