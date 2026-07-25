@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Collections.ObjectModel;
-using client_core.core;
 using Avalonia.Controls.Primitives;
+using network_core.core;
 
 namespace client_ui.ViewModels;
 

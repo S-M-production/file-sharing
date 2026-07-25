@@ -2,8 +2,9 @@ using System;
 using Avalonia;
 using ReactiveUI;
 using Microsoft.Extensions.Logging;
-using client_core.core;
 using System.Threading.Tasks;
+using client_core.middleware;
+using network_core.core;
 
 namespace client_ui.ViewModels;
 
@@ -13,6 +14,7 @@ public class MainWindowViewModel : ReactiveObject
     private string _ipAddress = "";
     private string _portNumber = "";
     private Connection? _connection;
+    private Middleware _middleware;
 
     public string IpAddress
     {
@@ -50,7 +52,8 @@ public class MainWindowViewModel : ReactiveObject
 
         try
         {
-            var connection = await Connector.Connect(IpAddress, port, LoggerSingleton._instance);
+            //TODO: Initializr a middleware inside the class and store it for more distribution and object lifecycle stuff
+            var connection = await Connector.Connect(IpAddress, port, LoggerSingleton._instance, new Middleware());
             ActiveConnection = connection;
         }
         catch (TimeoutException e)

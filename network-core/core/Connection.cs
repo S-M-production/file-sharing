@@ -15,15 +15,18 @@ namespace client_core.core;
 /// </remarks>
 public class Connection
 {
-    NetworkStream networkStream;
-    public Channel<ProtocolMessage> taskQueue = Channel.CreateUnbounded<ProtocolMessage>();
-    Task asyncLoopTask;
-    Task listenerTask;
-    private readonly TcpClient client;
-    private HeartBeat heartBeat;
-    private ILogger logger;
-    private IPAddress clientAddress;
-    private int clientPort;
+    private readonly NetworkStream _networkStream;
+    /// <summary>
+    /// Thread safe Queue for connection to write a message at a time to client
+    /// </summary>
+    public readonly Channel<ProtocolMessage> TaskQueue = Channel.CreateUnbounded<ProtocolMessage>();
+    private Task _asyncLoopTask;
+    private Task _listenerTask;
+    private readonly TcpClient _client;
+    private HeartBeat _heartBeat;
+    private readonly ILogger _logger;
+    private readonly IPAddress _clientAddress;
+    private readonly int _clientPort;
     public RouterMap RouterMap { get; } = new RouterMap();
     /// <summary>
     /// Sets up listening and writing loop for the connection
@@ -34,15 +37,15 @@ public class Connection
     public Connection(TcpClient client,ILogger logger)
     {
         IPEndPoint clientInfo = client.Client.RemoteEndPoint as IPEndPoint;
-        clientAddress = clientInfo.Address.MapToIPv4();
-        clientPort = clientInfo.Port;
+        _clientAddress = clientInfo.Address.MapToIPv4();
+        _clientPort = clientInfo.Port;
         
-        this.client = client;
-        networkStream = client.GetStream();
-        listenerTask = new Listener(client,logger,this,RouterMap).Run();
-        asyncLoopTask = StartAsyncWriteLoop();
-        heartBeat = new HeartBeat(this);
-        this.logger = logger;
+        this._client = client;
+        _networkStream = client.GetStream();
+        _listenerTask = new Listener(client,logger,this,RouterMap).Run();
+        _asyncLoopTask = StartAsyncWriteLoop();
+        _heartBeat = new HeartBeat(this);
+        this._logger = logger;
     }
     /// <summary>
     /// Puts message into a ordered queue that will serialize messages one at a time 
@@ -50,25 +53,33 @@ public class Connection
     /// <param name="protocolMessage">Message that needs to be sent</param>
     public async Task AddTask(ProtocolMessage protocolMessage)
     {
-        await taskQueue.Writer.WriteAsync(protocolMessage);
+        await TaskQueue.Writer.WriteAsync(protocolMessage);
     }
     /// <summary>
     /// Way to end the queue
     /// </summary>
-    public async Task CompleteQueue()
+    public Task CompleteQueue()
     {
-        taskQueue.Writer.Complete();
+        try
+        {
+            TaskQueue.Writer.Complete();
+            return Task.CompletedTask;
+        }
+        catch (Exception exception)
+        {
+            return Task.FromException(exception);
+        }
     }
     /// <summary>
     /// Starting up async writing loop, this loop will take a message at a time out of the queue and serialize it. Should only be ran once
     /// </summary>
     async Task StartAsyncWriteLoop()
     {
-        await foreach (ProtocolMessage packet in taskQueue.Reader.ReadAllAsync())
+        await foreach (ProtocolMessage packet in TaskQueue.Reader.ReadAllAsync())
         {
             byte[] buffer = ProtocolSerializer.Serialize(packet);
-            await networkStream.WriteAsync(buffer, 0, buffer.Length);   
-            logger.LogInformation("Wrote: {0} to {1}:{2}",ProtocolSerializer.ReadableSerialize(packet),clientAddress,clientPort);
+            await _networkStream.WriteAsync(buffer, 0, buffer.Length);   
+            _logger.LogInformation("Wrote: {0} to {1}:{2}",ProtocolSerializer.ReadableSerialize(packet),_clientAddress,_clientPort);
         }
     }
     
