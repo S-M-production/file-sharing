@@ -19,7 +19,7 @@ public class Listener(IPAddress address, int port, ILogger logger)
 
         logger.LogInformation("Started listening on {Address}:{Port}", address, port);
 
-        var connections = new ThreadSafeHasset();
+        var connections = new UserList();
         
         while(true)
         {

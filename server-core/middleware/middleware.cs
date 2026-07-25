@@ -5,7 +5,7 @@ namespace server_core.middleware;
 
 public static class Middleware
 {
-    public static ProtocolMessage? GetResponse(ProtocolMessage message, ThreadSafeHasset connections)
+    public static ProtocolMessage? GetResponse(ProtocolMessage message, UserList connections)
     {
         if (message.MessageType == MessageType.RequestUserList)
             return new ProtocolMessage(MessageType.UserList, connections.Serialize());
