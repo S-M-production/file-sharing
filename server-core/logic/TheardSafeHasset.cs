@@ -1,46 +1,28 @@
+using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
+using server_core.core;
 
 namespace server_core.logic;
-public class ThreadSafeHasset
+/// <summary>
+/// class to house dictionary relation ip:port->worker object
+/// </summary>
+public class UserList
 {
-    private readonly HashSet<string> _connections = new HashSet<string>();
-    private readonly Lock _lock = new Lock();
+    /// <summary>
+    /// All the connections related from ip:port->worker object
+    /// </summary>
+    /// <remarks>
+    /// Designed this way so one worker can feed a request into another worker to send a messagfe
+    /// </remarks>
+    public ConcurrentDictionary<string, Worker> Connections {get; } = new();
 
-    public bool Add(string ipPort)
-    {
-        lock (_lock)
-        {
-            return _connections.Add(ipPort);
-        }
-    }
-    public bool Remove(string ipPort)
-    {
-        lock (_lock)
-        {
-            return _connections.Remove(ipPort);
-        }
-    }
-    public bool Contains(string ipPort)
-    {
-        lock (_lock)
-        {
-            return _connections.Contains(ipPort);
-        }
-    }
-    public List<string> GetAll()
-    {
-        lock (_lock)
-        {
-            return _connections.ToList();
-        }
-    }
-
+    /// <summary>
+    /// Converts the Concurrent dict, to only key values, then to list, parses into JSON and encodes into utf-8 bytes
+    /// </summary>
+    /// <returns>Returns byte[] of JSON array of keys</returns>
     public byte[] Serialize()
     {
-        lock (_lock)
-        {
-            return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(_connections.ToList()));
-        }
+        return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Connections.Keys.ToArray()));
     }
 }

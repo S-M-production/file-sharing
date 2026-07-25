@@ -7,10 +7,17 @@ using server_core.logic;
 
 namespace server_core.core;
 
-public class Worker(TcpClient tcpClient, ILogger logger, ThreadSafeHasset connections)
+/// <summary>
+/// Class that owns a single connection
+/// </summary>
+/// <param name="tcpClient">Connection to client</param>
+/// <param name="logger">Logger created at the start of program</param>
+/// <param name="connections">List of all connections</param>
+public class Worker(TcpClient tcpClient, ILogger logger, UserList connections)
 {
     private IPAddress _clientAddress = ((tcpClient.Client.RemoteEndPoint as IPEndPoint)!).Address.MapToIPv4();
     private int _clientPort = ((tcpClient.Client.RemoteEndPoint as IPEndPoint)!).Port;
+
     /// <summary>
     /// Registers users connection
     /// Then actively listens and forwards responses to middleware
@@ -33,7 +40,7 @@ public class Worker(TcpClient tcpClient, ILogger logger, ThreadSafeHasset connec
             {
                 logger.LogWarning("Issue handling... disconnection {}:{}",_clientAddress,_clientPort);
                 logger.LogTrace(e.StackTrace);
-                connections.Remove($"{_clientAddress}:{_clientPort}");
+                connections.Connections.TryRemove($"{_clientAddress}:{_clientPort}",out _);
                 return;
             }
         
@@ -69,6 +76,6 @@ public class Worker(TcpClient tcpClient, ILogger logger, ThreadSafeHasset connec
         _clientPort = clientInfo.Port;
         
         logger.LogInformation("Worker handling client {}:{}",_clientAddress,_clientPort);
-        connections.Add($"{_clientAddress}:{_clientPort}");
+        connections.Connections.TryAdd($"{_clientAddress}:{_clientPort}",this);
     }
 }
