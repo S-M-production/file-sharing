@@ -1,9 +1,7 @@
-using client_core.router;
 using format.core;
 using router_core.core;
-using router_core.middleware;
 
-namespace client_core.middleware;
+namespace router_core.middleware;
 
 /// <summary>
 /// Currently does nothing but redirect the request to router
@@ -11,7 +9,7 @@ namespace client_core.middleware;
 /// <remarks>
 /// In future will contain validation etc.
 /// </remarks>
-public class Middleware:IMiddleware
+public interface IMiddleware
 {
     /// <summary>
     /// Performs a few middle ware checks (Not yet in place) And calls handle of the route

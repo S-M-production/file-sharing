@@ -1,15 +1,17 @@
 using System.Net;
 using System.Net.Sockets;
-using client_core.router;
 using format.core;
 using Microsoft.Extensions.Logging;
+using router_core.core;
+using router_core.middleware;
 
-namespace client_core.core;
+namespace network_core.core;
 /// <summary>
 /// Class that listens to one single valid connection and initiates request pipeline
 /// </summary>
 public class Listener
 {
+    private readonly TcpClient _tcpClient;
     private readonly ILogger _logger;
     private readonly IPAddress _clientAddress;
     private readonly int _clientPort;
@@ -29,8 +31,9 @@ public class Listener
     /// <param name="connection">A connection object for writing to client</param>
     /// <param name="routerMap">Router map the listener will use, needs to be passed in or else it cant be accessed outside</param>
     /// <exception cref="IOException">When an improper TcpClient is inputted, one that doesn't return IP:PORT</exception>
-    public Listener(TcpClient tcpClient, ILogger logger,Connection connection,RouterMap routerMap)
+    public Listener(TcpClient tcpClient, ILogger logger,Connection connection,RouterMap routerMap,IMiddleware middleware)
     {
+        _tcpClient = tcpClient;
         this._logger = logger;
         this._connection = connection;
         
@@ -66,13 +69,14 @@ public class Listener
             {
                 _logger.LogTrace("Issue handling... Disconnecting {Address}:{Port} \n{Error}",_clientAddress,_clientPort,e.StackTrace);
                 _stream?.Close();
+                _tcpClient?.Close();
                 return;
             }
         
             _logger.LogInformation("Got message: {} {}:{}",ProtocolSerializer.ReadableSerialize(message),_clientAddress,_clientPort);
         
             //TODO: Create routing layer and create middleware
-            ProtocolMessage? response = middleware.Middleware.GetResponse(message,RouterMap);
+            ProtocolMessage? response = IMiddleware.GetResponse(message,RouterMap);
         
             if (response == null)  continue;
         

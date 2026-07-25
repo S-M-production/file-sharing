@@ -16,6 +16,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\format\format.csproj" />
+    <ProjectReference Include="..\network-core\network-core.csproj" />
+    <ProjectReference Include="..\router-core\router-core.csproj" />
   </ItemGroup>
   
   <PropertyGroup>

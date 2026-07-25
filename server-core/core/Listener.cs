@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
+using network_core.core;
 using server_core.logic;
+using server_core.middleware;
 
 namespace server_core.core;
 /// <summary>
@@ -28,9 +30,9 @@ public class Listener(IPAddress address, int port, ILogger logger)
             logger.LogInformation(
                 "Client connected: {Client}",
                 client.Client.RemoteEndPoint);
-
+            Connection connection = new(client, logger,new Middleware());
             Worker worker = new Worker(client,logger, connections);
-            _ = worker.Run();
+            worker.Run();
         }
     }
 }

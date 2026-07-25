@@ -1,3 +1,4 @@
-#All changed files and reasons behind their changes:
--ThreadSafeHasset: Will be turned into a ConccurentDictionary connecting ip:port->worker object, renamed to UserList
--UserList(server-core-test): whole thing commented out, need to redo the test 
+##All changed files and reasons behind their changes:
+
+#Now Going to setup server to use network-core and router-core
+-MainWindowViewModel.cs: After setting connection i start it using its start method

@@ -1,6 +1,8 @@
-﻿using client_core.core;
+﻿
+using client_core.middleware;
 using format.core;
 using Microsoft.Extensions.Logging;
+using network_core.core;
 
 namespace client_core;
 
@@ -14,7 +16,7 @@ public class Program
         logger.LogInformation("Connecting to server");
         try
         {
-            connection = await Connector.Connect("64.181.236.111", 13000, logger);
+            connection = await Connector.Connect("64.181.236.111", 13000, logger, new Middleware());
         }
         catch (Exception e)
         {
