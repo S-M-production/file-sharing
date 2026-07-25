@@ -54,6 +54,8 @@ public class MainWindowViewModel : ReactiveObject
         {
             //TODO: Initializr a middleware inside the class and store it for more distribution and object lifecycle stuff
             var connection = await Connector.Connect(IpAddress, port, LoggerSingleton._instance, new Middleware());
+            connection!.Start();
+            LoggerSingleton._instance.LogInformation("Connected to server!!!");
             ActiveConnection = connection;
         }
         catch (TimeoutException e)
