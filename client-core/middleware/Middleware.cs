@@ -1,5 +1,7 @@
 using client_core.router;
 using format.core;
+using router_core.core;
+using router_core.middleware;
 
 namespace client_core.middleware;
 
@@ -9,7 +11,7 @@ namespace client_core.middleware;
 /// <remarks>
 /// In future will contain validation etc.
 /// </remarks>
-public static class Middleware
+public class Middleware:IMiddleware
 {
     /// <summary>
     /// Performs a few middle ware checks (Not yet in place) And calls handle of the route

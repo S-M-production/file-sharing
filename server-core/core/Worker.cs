@@ -3,7 +3,9 @@ using System.Net.Sockets;
 using System.Text;
 using format.core;
 using Microsoft.Extensions.Logging;
+using network_core.core;
 using server_core.logic;
+using server_core.middleware;
 
 namespace server_core.core;
 
@@ -13,49 +15,40 @@ namespace server_core.core;
 /// <param name="tcpClient">Connection to client</param>
 /// <param name="logger">Logger created at the start of program</param>
 /// <param name="connections">List of all connections</param>
-public class Worker(TcpClient tcpClient, ILogger logger, UserList connections)
+public class Worker
 {
-    private IPAddress _clientAddress = ((tcpClient.Client.RemoteEndPoint as IPEndPoint)!).Address.MapToIPv4();
-    private int _clientPort = ((tcpClient.Client.RemoteEndPoint as IPEndPoint)!).Port;
+    private IPAddress _clientAddress;
+    private int _clientPort;
+    /// <summary>
+    /// Connection object created at creation of worker, houses logic for communication
+    /// </summary>
+    public readonly Connection Connection;
+    private readonly Middleware _middleware;
+    private TcpClient _tcpClient;
+    private ILogger _logger;
+    private readonly UserList _connections;
+    public Worker(TcpClient tcpClient, ILogger logger, UserList connections)
+    {
+        _tcpClient = tcpClient;
+        _logger = logger;
+        this._connections = connections;
+        _middleware = new Middleware();
+        Connection= new Connection(tcpClient,logger,_middleware);
+        var temp = (tcpClient.Client.RemoteEndPoint as IPEndPoint)!;
+        _clientAddress = temp.Address.MapToIPv4();
+        _clientPort = temp.Port;
+    }
+     
 
     /// <summary>
     /// Registers users connection
     /// Then actively listens and forwards responses to middleware
     /// Then responds with what middleware responded with
     /// </summary>
-    public async Task Run()
+    public void Run()
     {
         RegisterUserConnection();
-        await using var stream = tcpClient.GetStream();
-
-        var parser = new Parser(stream);
-
-        while (true)
-        {
-            ProtocolMessage message;
-            try
-            {
-                message = await parser.Parse();
-            }catch (IOException e)
-            {
-                logger.LogWarning("Issue handling... disconnection {}:{}",_clientAddress,_clientPort);
-                logger.LogTrace(e.StackTrace);
-                connections.Connections.TryRemove($"{_clientAddress}:{_clientPort}",out _);
-                return;
-            }
-        
-            logger.LogInformation("Got message: {} {}:{}",ProtocolSerializer.ReadableSerialize(message),_clientAddress,_clientPort);
-        
-            //TODO: Create routing layer and create middleware
-            ProtocolMessage? response = middleware.Middleware.GetResponse(message, connections);
-        
-            if (response == null)  return;
-        
-            await stream.WriteAsync(ProtocolSerializer.Serialize(response));  
-            Console.Write("Wrote: ");
-            Console.Write(ProtocolSerializer.ReadableSerialize(response));
-            Console.WriteLine(" To {0} {1}:{2}",Encoding.UTF8.GetString(message.Body),_clientAddress,_clientPort);
-        }
+        Connection.Start();
         
     }
     /// <summary>
@@ -63,19 +56,19 @@ public class Worker(TcpClient tcpClient, ILogger logger, UserList connections)
     /// </summary>
     private void RegisterUserConnection()
     {
-        IPEndPoint? clientInfo = tcpClient.Client.RemoteEndPoint as IPEndPoint;
+        IPEndPoint? clientInfo = _tcpClient.Client.RemoteEndPoint as IPEndPoint;
 
         if (clientInfo?.Address == null || clientInfo.Port <= 0)
         {
-            logger.LogWarning("Client connection has no endpoint information. Closing connection.");
-            tcpClient.Close();
+            _logger.LogWarning("Client connection has no endpoint information. Closing connection.");
+            _tcpClient.Close();
             return;
         }
         
         _clientAddress = clientInfo.Address;
         _clientPort = clientInfo.Port;
         
-        logger.LogInformation("Worker handling client {}:{}",_clientAddress,_clientPort);
-        connections.Connections.TryAdd($"{_clientAddress}:{_clientPort}",this);
+        _logger.LogInformation("Worker handling client {}:{}",_clientAddress,_clientPort);
+        _connections.Connections.TryAdd($"{_clientAddress}:{_clientPort}",this);
     }
 }

@@ -1,6 +1,6 @@
 using format.core;
 
-namespace client_core.core;
+namespace network_core.core;
 
 public class HeartBeat
 {

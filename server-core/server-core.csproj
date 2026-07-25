@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\format\format.csproj" />
+    <ProjectReference Include="..\network-core\network-core.csproj" />
   </ItemGroup>
   <PropertyGroup>
     <StartupObject>server_core.Program</StartupObject>

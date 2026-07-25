@@ -1,4 +1,4 @@
-namespace client_core.router;
+namespace router_core.core;
 
 /// <summary>
 /// Wrapper for a handle in RouterMap to add a cap to how many times

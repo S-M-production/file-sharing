@@ -1,6 +1,6 @@
 using format.core;
 
-namespace client_core.router;
+namespace router_core.core;
 
 /// <inheritdoc />
 public delegate ProtocolMessage? MessageHandler(ProtocolMessage message);    

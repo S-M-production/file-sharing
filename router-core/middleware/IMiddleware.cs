@@ -1,7 +1,7 @@
 using format.core;
 using router_core.core;
 
-namespace network_core.middleware;
+namespace router_core.middleware;
 
 /// <summary>
 /// Currently does nothing but redirect the request to router

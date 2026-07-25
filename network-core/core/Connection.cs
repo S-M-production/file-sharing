@@ -1,11 +1,12 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Channels;
-using client_core.router;
 using format.core;
 using Microsoft.Extensions.Logging;
+using router_core.core;
+using router_core.middleware;
 
-namespace client_core.core;
+namespace network_core.core;
 /// <summary>
 /// Class that houses the reader and writer for a connection
 /// </summary>
@@ -20,33 +21,45 @@ public class Connection
     /// Thread safe Queue for connection to write a message at a time to client
     /// </summary>
     public readonly Channel<ProtocolMessage> TaskQueue = Channel.CreateUnbounded<ProtocolMessage>();
-    private Task _asyncLoopTask;
-    private Task _listenerTask;
+    private Task _asyncLoopTask = null!;
+    private Listener _listener;
+    private Task _listenerTask = null!;
     private readonly TcpClient _client;
-    private HeartBeat _heartBeat;
+    private HeartBeat _heartBeat = null!;
     private readonly ILogger _logger;
     private readonly IPAddress _clientAddress;
     private readonly int _clientPort;
+    public IMiddleware Middleware { get; }
     public RouterMap RouterMap { get; } = new RouterMap();
+    private int Started = 0;
     /// <summary>
     /// Sets up listening and writing loop for the connection
     /// </summary>
     /// <param name="client">TcpClient connection, Ideally should be a server connection that is validated through Connector</param>
     /// <param name="logger">ILogger that is passed down into here</param>
+    /// <param name="middleware">Middleware provided by core utilizing this class</param>
     /// TODO: Use .NET DI for logger
-    public Connection(TcpClient client,ILogger logger)
+    public Connection(TcpClient client,ILogger logger,IMiddleware middleware)
     {
-        IPEndPoint clientInfo = client.Client.RemoteEndPoint as IPEndPoint;
+        IPEndPoint clientInfo = (client.Client.RemoteEndPoint as IPEndPoint)!;
         _clientAddress = clientInfo.Address.MapToIPv4();
         _clientPort = clientInfo.Port;
-        
         this._client = client;
+        this.Middleware = middleware;
         _networkStream = client.GetStream();
-        _listenerTask = new Listener(client,logger,this,RouterMap).Run();
-        _asyncLoopTask = StartAsyncWriteLoop();
-        _heartBeat = new HeartBeat(this);
+        _listener = new Listener(client,logger,this,RouterMap,middleware);
         this._logger = logger;
     }
+
+    public void Start()
+    {
+        if (Started != 0) return;
+        Started = 1;
+        _asyncLoopTask = StartAsyncWriteLoop();
+        _listenerTask = _listener.Run();
+        _heartBeat = new HeartBeat(this);
+    } 
+    
     /// <summary>
     /// Puts message into a ordered queue that will serialize messages one at a time 
     /// </summary>

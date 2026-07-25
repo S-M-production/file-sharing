@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using format.core;
 
-namespace client_core.router;
+namespace router_core.core;
 
 /// <summary>
 /// Routing map for router

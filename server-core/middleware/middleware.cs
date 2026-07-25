@@ -1,10 +1,21 @@
 using format.core;
+using router_core.middleware;
 using server_core.logic;
 
 namespace server_core.middleware;
 
-public static class Middleware
+/// <inheritdoc />
+public class Middleware:IMiddleware
 {
+    /// <summary>
+    /// Has checks for:
+    /// RequestUserList, replies with UserList 
+    /// Connect, replies with ConnectedToServer
+    /// Ping, replies with pong
+    /// </summary>
+    /// <param name="message">Incoming message</param>
+    /// <param name="connections">Outgoing message</param>
+    /// <returns></returns>
     public static ProtocolMessage? GetResponse(ProtocolMessage message, UserList connections)
     {
         if (message.MessageType == MessageType.RequestUserList)
