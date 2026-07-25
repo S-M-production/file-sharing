@@ -9,6 +9,7 @@ public partial class ListWindow : Window
     public ListWindow()
     {
         InitializeComponent();
+        
     }
 
     private void OnDragWindow(object? sender, PointerPressedEventArgs e)

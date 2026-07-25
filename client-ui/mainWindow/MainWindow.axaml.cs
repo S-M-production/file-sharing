@@ -7,6 +7,7 @@ using System.Text;
 using client_ui.ViewModels;
 using client_core.router.logic;
 using format.core;
+using System.Security.Cryptography.X509Certificates;
 
 namespace client_ui;
 

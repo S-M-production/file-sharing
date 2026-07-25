@@ -6,6 +6,8 @@ using System.Reactive;
 using System.Collections.ObjectModel;
 using Avalonia.Controls.Primitives;
 using network_core.core;
+using format.core;
+using System.Threading.Tasks;
 
 namespace client_ui.ViewModels;
 
@@ -75,6 +77,9 @@ public class Row : ReactiveObject
                 Console.WriteLine("Row command exception" + ex);
                 throw;
             }
+            var temp = Ip + ":" + Port.ToString();
+            Task con = activeConnection.AddTask(new ProtocolMessage(MessageType.ConnectToUser, System.Text.Encoding.UTF8.GetBytes(temp)));
+            con.Wait();
         });
     }
 }
