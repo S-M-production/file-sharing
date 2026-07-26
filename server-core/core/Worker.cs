@@ -32,7 +32,7 @@ public class Worker
         _tcpClient = tcpClient;
         _logger = logger;
         this._connections = connections;
-        _middleware = new Middleware(connections);
+        _middleware = new Middleware(connections, (tcpClient.Client.RemoteEndPoint as IPEndPoint)!);
         Connection= new Connection(tcpClient,logger,_middleware);
         var temp = (tcpClient.Client.RemoteEndPoint as IPEndPoint)!;
         _clientAddress = temp.Address.MapToIPv4();
