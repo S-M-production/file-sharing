@@ -18,6 +18,8 @@ public class Listener
     private readonly NetworkStream _stream;
     private readonly Parser _parser;
     private Connection _connection;
+    private readonly IMiddleware _middleware;
+
     /// <summary>
     /// Router that belongs to one listening connection
     /// </summary>
@@ -30,13 +32,15 @@ public class Listener
     /// <param name="logger">The logger passed down from initial project creation</param>
     /// <param name="connection">A connection object for writing to client</param>
     /// <param name="routerMap">Router map the listener will use, needs to be passed in or else it cant be accessed outside</param>
+    /// <param name="middleware">Middleware passed in</param>
     /// <exception cref="IOException">When an improper TcpClient is inputted, one that doesn't return IP:PORT</exception>
     public Listener(TcpClient tcpClient, ILogger logger,Connection connection,RouterMap routerMap,IMiddleware middleware)
     {
         _tcpClient = tcpClient;
         this._logger = logger;
         this._connection = connection;
-        
+        _middleware = middleware;
+
         IPEndPoint? clientInfo = tcpClient.Client.RemoteEndPoint as IPEndPoint;
         if (clientInfo == null) throw new IOException("Improper Connection???");
         
@@ -60,6 +64,7 @@ public class Listener
     {
         while (true)
         {
+            _logger.LogInformation("Waiting for Message...");
             ProtocolMessage message;
             try
             {
@@ -76,11 +81,10 @@ public class Listener
             _logger.LogInformation("Got message: {} {}:{}",ProtocolSerializer.ReadableSerialize(message),_clientAddress,_clientPort);
         
             //TODO: Create routing layer and create middleware
-            ProtocolMessage? response = IMiddleware.GetResponse(message,RouterMap);
-        
+            ProtocolMessage? response = _middleware.GetResponse(message,RouterMap);
             if (response == null)  continue;
-        
-            await _stream.WriteAsync(ProtocolSerializer.Serialize(response));  
+            _logger.LogInformation(ProtocolSerializer.ReadableSerialize(response));
+            await _connection.AddTask(response);
         }
         
     }

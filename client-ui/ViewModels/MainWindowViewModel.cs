@@ -66,6 +66,7 @@ public class MainWindowViewModel : ReactiveObject
         catch (Exception e)
         {
             LoggerSingleton._instance.LogError("Connecting to invalid server {}",e.Message);
+            LoggerSingleton._instance.LogCritical(e.StackTrace);
             return false;
         }
         LoggerSingleton._instance.LogInformation("Connected to server!!!");
