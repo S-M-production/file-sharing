@@ -4,6 +4,9 @@ using server_core.core;
 
 namespace server_core;
 
+/// <summary>
+/// Server entry point
+/// </summary>
 public class Program
 {
     private static IPAddress? _address;
@@ -19,7 +22,7 @@ public class Program
 
         if (args.Length != 2)
         {
-            logger.LogError("\nPlease input \'ip adress\' \'port\'");
+            logger.LogError("\nPlease input \'ip address\' \'port\'");
             return;
         }
 

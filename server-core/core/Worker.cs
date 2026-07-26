@@ -1,7 +1,5 @@
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using format.core;
 using Microsoft.Extensions.Logging;
 using network_core.core;
 using server_core.logic;
@@ -12,9 +10,6 @@ namespace server_core.core;
 /// <summary>
 /// Class that owns a single connection
 /// </summary>
-/// <param name="tcpClient">Connection to client</param>
-/// <param name="logger">Logger created at the start of program</param>
-/// <param name="connections">List of all connections</param>
 public class Worker
 {
     private IPAddress _clientAddress;
@@ -27,12 +22,17 @@ public class Worker
     private TcpClient _tcpClient;
     private ILogger _logger;
     private readonly UserList _connections;
+    
+    /// <summary>Constructor</summary>
+    /// <param name="tcpClient">Connection to client</param>
+    /// <param name="logger">Logger created at the start of program</param>
+    /// <param name="connections">List of all connections</param>
     public Worker(TcpClient tcpClient, ILogger logger, UserList connections)
     {
         _tcpClient = tcpClient;
         _logger = logger;
         this._connections = connections;
-        _middleware = new Middleware();
+        _middleware = new Middleware(connections);
         Connection= new Connection(tcpClient,logger,_middleware);
         var temp = (tcpClient.Client.RemoteEndPoint as IPEndPoint)!;
         _clientAddress = temp.Address.MapToIPv4();

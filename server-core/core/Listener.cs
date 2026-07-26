@@ -30,7 +30,6 @@ public class Listener(IPAddress address, int port, ILogger logger)
             logger.LogInformation(
                 "Client connected: {Client}",
                 client.Client.RemoteEndPoint);
-            Connection connection = new(client, logger,new Middleware());
             Worker worker = new Worker(client,logger, connections);
             worker.Run();
         }
