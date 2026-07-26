@@ -48,7 +48,7 @@ public class Worker
     public void Run()
     {
         RegisterUserConnection();
-        Connection.Start();
+        Connection.Start(false);
         
     }
     /// <summary>

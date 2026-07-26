@@ -19,6 +19,7 @@ public class Middleware:IMiddleware
     /// Constructor
     /// </summary>
     /// <param name="userList">Pass in userlist here so GetResponse will have the right definition</param>
+    /// <param name="ip">IEndpoint of worker that's handling the connection that's using this</param>
     public Middleware(UserList userList, IPEndPoint ip)
     {
         _userList = userList;
@@ -45,9 +46,12 @@ public class Middleware:IMiddleware
             case MessageType.Ping:
                 return new ProtocolMessage(MessageType.Pong);
             case MessageType.ConnectToUser:
-                string tempText = Encoding.UTF8.GetString(message.Body);
+                var tempText = Encoding.UTF8.GetString(message.Body);
                 if (!_userList.Connections.TryGetValue(tempText, out Worker worker)) return new ProtocolMessage(MessageType.UserNotFound);
-                _ = worker.Connection.AddTask(new ProtocolMessage(MessageType.ConnectToUser, Encoding.UTF8.GetBytes(_ip.Address.MapToIPv4().ToString())));
+                var response = new ProtocolMessage(MessageType.ConnectToUser,
+                    Encoding.UTF8.GetBytes(_ip.Address.MapToIPv4().ToString() + _ip.Port.ToString()));
+                await worker.Connection.AddTask(response);
+                Console.WriteLine("Wrote: {0} to: {1}",ProtocolSerializer.ReadableSerialize(response),tempText);
                 return null;
             default:
                 return null;

@@ -51,12 +51,13 @@ public class Connection
         this._logger = logger;
     }
 
-    public void Start()
+    public void Start(bool heartbeat = true)
     {
         if (Started != 0) return;
         Started = 1;
         _asyncLoopTask = StartAsyncWriteLoop();
         _listenerTask = _listener.Run();
+        if (!heartbeat) return;
         _heartBeat = new HeartBeat(this);
     } 
     
