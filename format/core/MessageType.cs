@@ -9,6 +9,10 @@ public enum MessageType : int
     /// </summary>
     Connect,
     /// <summary>
+    /// request to leave, removing you from list and visiblity
+    /// </summary>
+    Disconnect,
+    /// <summary>
     /// Request to get full user list from server, for now contains no body
     /// </summary>
     RequestUserList,

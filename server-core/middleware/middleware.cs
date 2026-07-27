@@ -53,6 +53,9 @@ public class Middleware:IMiddleware
                 await worker.Connection.AddTask(response);
                 Console.WriteLine("Wrote: {0} to: {1}",ProtocolSerializer.ReadableSerialize(response),tempText);
                 return null;
+            case MessageType.Disconnect:
+            /// was unsure of what to put here but know it will want implimentation later.
+                return null;
             default:
                 return null;
         }
