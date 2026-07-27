@@ -19,7 +19,7 @@ public class Middleware:IMiddleware
     /// <param name="message">The message received from server</param>
     /// <param name="routerMap">The map the middleware should use</param>
     /// <returns>returns null if it couldn't be retrieved, returns a protocol message when the handle returns something</returns>
-    public static ProtocolMessage? GetResponse(ProtocolMessage message,RouterMap routerMap)
+    public async Task<ProtocolMessage?> GetResponse(ProtocolMessage message,RouterMap routerMap)
     {
         //TODO: Fill out middleware if statement logic
         if(!routerMap.GetRoute(message.MessageType, out var handle)) return null;

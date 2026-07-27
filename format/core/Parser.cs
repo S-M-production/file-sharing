@@ -32,7 +32,7 @@ public class Parser(NetworkStream networkStream)
         if (!signature.SequenceEqual(ExpectedSignature))
         {
             throw new IOException(
-                $"Invalid protocol ID '{Encoding.ASCII.GetString(signature)}'. Expected 'CNSR'."
+                $"Invalid protocol ID '{Encoding.UTF8.GetString(signature)}'. Expected 'CNSR'."
             );
         }
         MessageType messageType = (MessageType) BitConverter.ToInt32(header, SignatureSize);

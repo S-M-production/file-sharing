@@ -44,5 +44,9 @@ public enum MessageType : int
     /// <summary>
     /// For protocol message used within one program, contains body
     /// </summary>
-    Internal
+    Internal,
+    /// <summary>
+    /// failed to find user in list
+    /// </summary>
+    UserNotFound
 }
