@@ -35,8 +35,6 @@ public partial class MainWindow : Window
 
             var connection = viewModel.ActiveConnection!;
 
-            Console.WriteLine("Before all");
-
             // Create callback first
             UserListCallBack callBack = new UserListCallBack();
 
@@ -53,8 +51,6 @@ public partial class MainWindow : Window
 
             // Wait for response
             var awaitingList = await callBack._awaitingMessage.Task;
-
-            Console.WriteLine("After all");
 
             var text = Encoding.UTF8.GetString(awaitingList.Body);
 

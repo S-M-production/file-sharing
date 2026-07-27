@@ -64,7 +64,6 @@ public class Listener
     {
         while (true)
         {
-            _logger.LogInformation("Waiting for Message...");
             ProtocolMessage message;
             try
             {
@@ -78,12 +77,12 @@ public class Listener
                 return;
             }
         
-            _logger.LogInformation("Got message: {} {}:{}",ProtocolSerializer.ReadableSerialize(message),_clientAddress,_clientPort);
+            _logger.LogInformation("Got message: {1} \nFrom: {2}:{3}",ProtocolSerializer.ReadableSerialize(message),_clientAddress,_clientPort);
         
             //TODO: Create routing layer and create middleware
-            ProtocolMessage? response = _middleware.GetResponse(message,RouterMap);
+            ProtocolMessage? response = await _middleware.GetResponse(message,RouterMap);
             if (response == null)  continue;
-            _logger.LogInformation(ProtocolSerializer.ReadableSerialize(response));
+            _logger.LogInformation("Sent message: {0}",ProtocolSerializer.ReadableSerialize(response));
             await _connection.AddTask(response);
         }
         

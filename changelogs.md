@@ -1,2 +1,3 @@
 ##All changed files and reasons behind their changes:
--Altered alot, but mostly changed middleware and IMiddleware method defenition to match
+-middleware.cs(server-core.middleware): Added docs to Middleware constructor
+-middleware.cs(server-core.middleware): Changed user Identifyer from only IP to IP:PORT
