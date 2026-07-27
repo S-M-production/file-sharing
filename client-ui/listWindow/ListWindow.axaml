@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:client_ui.ViewModels;assembly=client-ui"
         x:DataType="vm:ListWindowViewModel"
-        x:Class="client_ui.ListWindow"
+        x:Class="client_ui.listWindow.ListWindow"
         Title="List Window"
         CanResize="False"
         Width="610" Height="320"
