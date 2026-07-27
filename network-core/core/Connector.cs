@@ -1,6 +1,7 @@
 using System.Net.Sockets;
 using format.core;
 using Microsoft.Extensions.Logging;
+using router_core.core;
 using router_core.middleware;
 
 namespace network_core.core;
@@ -29,7 +30,6 @@ public static class Connector
         Task<Connection?> result = ConnectToServer(server, port, logger, middleware);
         await Task.Delay(Timeout*1000);
         if(!result.IsCompleted) throw new TimeoutException("Timeout waiting for connection");
-        if (result.Result == null) throw new Exception("Invalid connection");
         return result.Result;
     }
     /// <summary>
@@ -54,7 +54,7 @@ public static class Connector
         Parser parser = new Parser(stream);
         ProtocolMessage response = await parser.Parse();
         
-        if (response.MessageType == MessageType.ConnectedToServer) return new Connection(client, logger,middleware);
+        if (response.MessageType == MessageType.ConnectedToServer) return new Connection(client, logger,middleware, new RouterMap());
         return null;
     }
     

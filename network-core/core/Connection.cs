@@ -32,6 +32,7 @@ public class Connection
     public IMiddleware Middleware { get; }
     public RouterMap RouterMap { get; } 
     private int Started = 0;
+    private TaskCompletionSource isWriterCompleted = new TaskCompletionSource();
     /// <summary>
     /// Sets up listening and writing loop for the connection
     /// </summary>
@@ -73,18 +74,17 @@ public class Connection
     /// <summary>
     /// Way to end the queue
     /// </summary>
-    public Task CompleteQueue()
+    public bool CompleteQueue()
     {
-        try
-        {
-            TaskQueue.Writer.Complete();
-            return Task.CompletedTask;
-        }
-        catch (Exception exception)
-        {
-            return Task.FromException(exception);
-        }
+        return TaskQueue.Writer.TryComplete();
     }
+
+    public async Task CompleteCallBack()
+    {
+        await isWriterCompleted.Task;
+        
+    }
+    
     /// <summary>
     /// Starting up async writing loop, this loop will take a message at a time out of the queue and serialize it. Should only be ran once
     /// </summary>
@@ -96,6 +96,7 @@ public class Connection
             await _networkStream.WriteAsync(buffer, 0, buffer.Length);   
             _logger.LogInformation("Wrote: {0} to {1}:{2}",ProtocolSerializer.ReadableSerialize(packet),_clientAddress,_clientPort);
         }
+        isWriterCompleted.TrySetResult();
     }
     
 }

@@ -30,6 +30,7 @@ public class ListWindowViewModel : ReactiveObject
         {
             await _activeConnection.AddTask(new ProtocolMessage(MessageType.Disconnect));
             _activeConnection.CompleteQueue();
+            await _activeConnection.CompleteCallBack();
             _window.Exit();
         });
     }
