@@ -1,5 +1,7 @@
 using System;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -54,10 +56,11 @@ public partial class MainWindow : Window
 
             // Assuming response is:
             // ["ip1","ip2"]
-            var textList = text[1..^1]
-                .Replace("\"", "")
-                .Split(",");
-            
+            var textList = JsonSerializer.Deserialize<String[]>(text);
+            // var textList = text[1..^1]
+            //     .Replace("\"", "")
+            //     .Split(",");
+            //
             var listWindow = new listWindow.ListWindow
             {
                 WindowStartupLocation = WindowStartupLocation.Manual,
