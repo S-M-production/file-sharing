@@ -1,15 +1,13 @@
-using Avalonia;
-using Avalonia.Input;
-using Avalonia.Controls;
-using Avalonia.Interactivity;
 using System;
 using System.Text;
-using client_ui.ViewModels;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using client_core.router.logic;
+using client_ui.ViewModels;
 using format.core;
-using System.Security.Cryptography.X509Certificates;
 
-namespace client_ui;
+namespace client_ui.mainWindow;
 
 public partial class MainWindow : Window
 {
@@ -60,7 +58,7 @@ public partial class MainWindow : Window
                 .Replace("\"", "")
                 .Split(",");
             
-            var listWindow = new ListWindow
+            var listWindow = new listWindow.ListWindow
             {
                 WindowStartupLocation = WindowStartupLocation.Manual,
                 Position = this.Position

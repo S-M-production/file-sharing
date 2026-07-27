@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:client_ui.ViewModels;assembly=client-ui"
         x:DataType="vm:MainWindowViewModel"
-        x:Class="client_ui.MainWindow"
+        x:Class="client_ui.mainWindow.MainWindow"
         Title="client_ui"
         CanResize="False"
         WindowDecorations ="None"

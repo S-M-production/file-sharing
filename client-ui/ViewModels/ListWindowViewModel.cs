@@ -17,11 +17,11 @@ namespace client_ui.ViewModels;
 public class ListWindowViewModel : ReactiveObject
 {
     private readonly Connection? _activeConnection;
-    private readonly ListWindow _window;
+    private readonly listWindow.ListWindow _window;
     public ReactiveCommand<Unit, Unit> RequestLeave { get; }
     public ObservableCollection<Row> RemotePeers { get; } = new();
 
-    public ListWindowViewModel(Connection? activeConnection, ListWindow window)
+    public ListWindowViewModel(Connection? activeConnection, listWindow.ListWindow window)
     {
         _activeConnection = activeConnection;
         _window = window;
