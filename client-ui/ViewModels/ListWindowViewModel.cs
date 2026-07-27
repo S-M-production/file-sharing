@@ -28,8 +28,8 @@ public class ListWindowViewModel : ReactiveObject
 
         RequestLeave = ReactiveCommand.CreateFromTask(async () =>
         {
-            await activeConnection.AddTask(new ProtocolMessage(MessageType.Disconnect));
-            await Task.Delay(75);
+            await _activeConnection.AddTask(new ProtocolMessage(MessageType.Disconnect));
+            _activeConnection.CompleteQueue();
             _window.Exit();
         });
     }

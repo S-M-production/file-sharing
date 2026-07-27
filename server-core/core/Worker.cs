@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
 using network_core.core;
+using router_core.core;
 using server_core.logic;
 using server_core.middleware;
 
@@ -22,6 +23,7 @@ public class Worker
     private TcpClient _tcpClient;
     private ILogger _logger;
     private readonly UserList _connections;
+    private readonly RouterMap _router;
     
     /// <summary>Constructor</summary>
     /// <param name="tcpClient">Connection to client</param>
@@ -31,9 +33,11 @@ public class Worker
     {
         _tcpClient = tcpClient;
         _logger = logger;
+        _router = new ();
+        _router.AddRoute(format.core.MessageType.Disconnect, new UserRemovel(_connections).Remove);
         this._connections = connections;
         _middleware = new Middleware(connections, (tcpClient.Client.RemoteEndPoint as IPEndPoint)!);
-        Connection= new Connection(tcpClient,logger,_middleware);
+        Connection= new Connection(tcpClient,logger,_middleware, _router);
         var temp = (tcpClient.Client.RemoteEndPoint as IPEndPoint)!;
         _clientAddress = temp.Address.MapToIPv4();
         _clientPort = temp.Port;

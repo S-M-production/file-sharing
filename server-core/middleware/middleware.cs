@@ -1,4 +1,5 @@
 using format.core;
+using Microsoft.VisualBasic;
 using router_core.core;
 using router_core.middleware;
 using server_core.core;
@@ -37,6 +38,7 @@ public class Middleware:IMiddleware
     /// <returns>May or maynot return a protocol message, depends on how the middleware is altered</returns>
     public async Task<ProtocolMessage?> GetResponse(ProtocolMessage message, RouterMap routerMap)
     {
+        var tempText = Encoding.UTF8.GetString(message.Body);
         switch (message.MessageType)
         {
             case MessageType.RequestUserList:
@@ -46,18 +48,15 @@ public class Middleware:IMiddleware
             case MessageType.Ping:
                 return new ProtocolMessage(MessageType.Pong);
             case MessageType.ConnectToUser:
-                var tempText = Encoding.UTF8.GetString(message.Body);
                 if (!_userList.Connections.TryGetValue(tempText, out Worker worker)) return new ProtocolMessage(MessageType.UserNotFound);
                 var response = new ProtocolMessage(MessageType.ConnectToUser,
                     Encoding.UTF8.GetBytes(_ip.Address.MapToIPv4().ToString() + _ip.Port.ToString()));
                 await worker.Connection.AddTask(response);
                 Console.WriteLine("Wrote: {0} to: {1}",ProtocolSerializer.ReadableSerialize(response),tempText);
                 return null;
-            case MessageType.Disconnect:
-            /// was unsure of what to put here but know it will want implimentation later.
-                return null;
             default:
-                return null;
+                if(!routerMap.GetRoute(message.MessageType, out var handle)) return null;
+                return handle(message);
         }
     }
 }

@@ -30,7 +30,7 @@ public class Connection
     private readonly IPAddress _clientAddress;
     private readonly int _clientPort;
     public IMiddleware Middleware { get; }
-    public RouterMap RouterMap { get; } = new RouterMap();
+    public RouterMap RouterMap { get; } 
     private int Started = 0;
     /// <summary>
     /// Sets up listening and writing loop for the connection
@@ -39,9 +39,10 @@ public class Connection
     /// <param name="logger">ILogger that is passed down into here</param>
     /// <param name="middleware">Middleware provided by core utilizing this class</param>
     /// TODO: Use .NET DI for logger
-    public Connection(TcpClient client,ILogger logger,IMiddleware middleware)
+    public Connection(TcpClient client,ILogger logger,IMiddleware middleware, RouterMap routerMap)
     {
         IPEndPoint clientInfo = (client.Client.RemoteEndPoint as IPEndPoint)!;
+        this.RouterMap = routerMap;
         _clientAddress = clientInfo.Address.MapToIPv4();
         _clientPort = clientInfo.Port;
         this._client = client;
