@@ -13,7 +13,7 @@ public class UserList
     /// All the connections related from ip:port->worker object
     /// </summary>
     /// <remarks>
-    /// Designed this way so one worker can feed a request into another worker to send a messagfe
+    /// Designed this way so one worker can feed a request into another worker to send a message
     /// </remarks>
     public ConcurrentDictionary<string, Worker> Connections {get; } = new();
 
@@ -21,8 +21,11 @@ public class UserList
     /// Converts the Concurrent dict, to only key values, then to list, parses into JSON and encodes into utf-8 bytes
     /// </summary>
     /// <returns>Returns byte[] of JSON array of keys</returns>
-    public byte[] Serialize()
+    public byte[] Serialize(string requestingUser = "")
     {
-        return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Connections.Keys.ToArray()));
+        var temp = Connections.Keys.ToList();
+        temp.Remove(requestingUser);
+        return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(temp));
+        
     }
 }

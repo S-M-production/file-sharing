@@ -6,14 +6,14 @@ namespace server_core.logic;
 /// <summary>
 /// used to remove a user
 /// </summary>
-public class UserRemovel
+public class UserRemoval
 {
     private readonly UserList _userlist;
     /// <summary>
     /// constructor
     /// </summary>
     /// <param name="userList">stored value of user list</param>
-    public UserRemovel(UserList userList)
+    public UserRemoval(UserList userList)
     {
         _userlist = userList;
     }

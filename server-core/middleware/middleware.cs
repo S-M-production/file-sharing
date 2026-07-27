@@ -42,7 +42,8 @@ public class Middleware:IMiddleware
         switch (message.MessageType)
         {
             case MessageType.RequestUserList:
-                return new ProtocolMessage(MessageType.UserList, _userList.Serialize());
+                string user = _ip.Address.MapToIPv4().ToString() +":"+ _ip.Port.ToString();
+                return new ProtocolMessage(MessageType.UserList, _userList.Serialize(user));
             case MessageType.Connect:
                 return new ProtocolMessage(MessageType.ConnectedToServer);
             case MessageType.Ping:
