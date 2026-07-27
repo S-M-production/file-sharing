@@ -55,6 +55,7 @@ public static class Connector
         ProtocolMessage response = await parser.Parse();
         
         if (response.MessageType == MessageType.ConnectedToServer) return new Connection(client, logger,middleware, new RouterMap());
+        logger.LogError($"Failed to connect to {server}:{port}, {ProtocolSerializer.ReadableSerialize(response)}");
         return null;
     }
     

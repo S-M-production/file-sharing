@@ -29,7 +29,7 @@ public class Program
             return;
         }
         Console.WriteLine("Connected!!!");
-        await connection.AddTask(new ProtocolMessage(MessageType.RequestUserList));
+        connection.AddTask(new ProtocolMessage(MessageType.RequestUserList));
         Console.WriteLine("RequestUserList");
         while (true) continue;
     }

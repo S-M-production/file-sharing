@@ -13,8 +13,14 @@ namespace server_core.core;
 /// </summary>
 public class Worker
 {
-    private IPAddress _clientAddress;
-    private int _clientPort;
+    /// <summary>
+    /// Be able to distinguish workers using this
+    /// </summary>
+    public IPAddress ClientAddress {get; private set;}
+    /// <summary>
+    /// Be able to distinguish workers using this
+    /// </summary>
+    public int _clientPort {get; private set;}
     /// <summary>
     /// Connection object created at creation of worker, houses logic for communication
     /// </summary>
@@ -39,7 +45,7 @@ public class Worker
         _middleware = new Middleware(connections, (tcpClient.Client.RemoteEndPoint as IPEndPoint)!);
         Connection= new Connection(tcpClient,logger,_middleware, _router);
         var temp = (tcpClient.Client.RemoteEndPoint as IPEndPoint)!;
-        _clientAddress = temp.Address.MapToIPv4();
+        ClientAddress = temp.Address.MapToIPv4();
         _clientPort = temp.Port;
     }
      
@@ -69,10 +75,10 @@ public class Worker
             return;
         }
         
-        _clientAddress = clientInfo.Address;
+        ClientAddress = clientInfo.Address;
         _clientPort = clientInfo.Port;
         
-        _logger.LogInformation("Worker handling client {}:{}",_clientAddress,_clientPort);
-        _connections.Connections.TryAdd($"{_clientAddress}:{_clientPort}",this);
+        _logger.LogInformation("Worker handling client {}:{}",ClientAddress,_clientPort);
+        _connections.TryAdd($"{ClientAddress}:{_clientPort}",this);
     }
 }

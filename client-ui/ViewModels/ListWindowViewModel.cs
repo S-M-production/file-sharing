@@ -28,7 +28,7 @@ public class ListWindowViewModel : ReactiveObject
 
         RequestLeave = ReactiveCommand.CreateFromTask(async () =>
         {
-            await _activeConnection.AddTask(new ProtocolMessage(MessageType.Disconnect));
+            _activeConnection.AddTask(new ProtocolMessage(MessageType.Disconnect));
             _activeConnection.CompleteQueue();
             await _activeConnection.CompleteCallBack();
             _window.Exit();
@@ -92,8 +92,7 @@ public class Row : ReactiveObject
                 throw;
             }
             var temp = Ip + ":" + Port.ToString();
-            Task con = activeConnection.AddTask(new ProtocolMessage(MessageType.ConnectToUser, System.Text.Encoding.UTF8.GetBytes(temp)));
-            con.Wait();
+            activeConnection.AddTask(new ProtocolMessage(MessageType.ConnectToUser, System.Text.Encoding.UTF8.GetBytes(temp)));
         });
     }
 }

@@ -67,9 +67,9 @@ public class Connection
     /// Puts message into a ordered queue that will serialize messages one at a time 
     /// </summary>
     /// <param name="protocolMessage">Message that needs to be sent</param>
-    public async Task AddTask(ProtocolMessage protocolMessage)
+    public void AddTask(ProtocolMessage protocolMessage)
     {
-        await TaskQueue.Writer.WriteAsync(protocolMessage);
+        TaskQueue.Writer.TryWrite(protocolMessage);
     }
     /// <summary>
     /// Way to end the queue

@@ -25,7 +25,7 @@ public class UserRemoval
     public ProtocolMessage? Remove(ProtocolMessage protocolMessage)
     {
         var temptext = Encoding.UTF8.GetString(protocolMessage.Body);
-        _userlist.Connections.TryRemove(temptext, out _);
+        _userlist.TryRemove(temptext, out _);
         return null;
     }
 }

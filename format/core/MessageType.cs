@@ -34,6 +34,14 @@ public enum MessageType : int
     /// </summary>
     UserList,
     /// <summary>
+    /// When a user joins the server, the server pub this to all users to add the new user
+    /// </summary>
+    AddUserToList,
+    /// <summary>
+    /// When a user leaves server, server pub this to all users to remove user from list
+    /// </summary>
+    RemoveUserFromList,
+    /// <summary>
     /// Asks client for what ports they have free to start UDP hole punch, for now contains no body
     /// </summary>
     PortNegotiation,

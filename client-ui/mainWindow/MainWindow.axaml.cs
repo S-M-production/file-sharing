@@ -44,7 +44,7 @@ public partial class MainWindow : Window
                 true);
 
             // Send request
-            await connection.AddTask(
+            connection.AddTask(
                 new ProtocolMessage(MessageType.RequestUserList));
 
             // Wait for response

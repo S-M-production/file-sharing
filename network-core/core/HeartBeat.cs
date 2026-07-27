@@ -24,7 +24,7 @@ public class HeartBeat
         while (true)
         {
             await Task.Delay((int)(HeartBeatInterval*1000));
-            await _connection.AddTask(new ProtocolMessage(MessageType.Ping));
+            _connection.AddTask(new ProtocolMessage(MessageType.Ping));
         }
     }
 }
