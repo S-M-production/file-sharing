@@ -59,16 +59,17 @@ public partial class MainWindow : Window
             var textList = text[1..^1]
                 .Replace("\"", "")
                 .Split(",");
-
-            var listWindowViewModel = new ListWindowViewModel(connection);
-            listWindowViewModel.RefreshList(textList);
-
+            
             var listWindow = new ListWindow
             {
-                DataContext = listWindowViewModel,
                 WindowStartupLocation = WindowStartupLocation.Manual,
                 Position = this.Position
             };
+            var listWindowViewModel = new ListWindowViewModel(connection, listWindow);
+            listWindowViewModel.RefreshList(textList);
+            listWindow.DataContext = listWindowViewModel;
+
+            
 
             listWindow.Show();
 

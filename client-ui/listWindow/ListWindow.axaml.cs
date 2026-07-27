@@ -16,4 +16,8 @@ public partial class ListWindow : Window
     {
         BeginMoveDrag(e);
     }
+    public void Exit()
+    {
+        this.Close();
+    }
 }

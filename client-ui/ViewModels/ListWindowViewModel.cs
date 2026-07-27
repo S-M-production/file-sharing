@@ -4,21 +4,34 @@ using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Collections.ObjectModel;
+using client_ui;
 using Avalonia.Controls.Primitives;
 using network_core.core;
 using format.core;
 using System.Threading.Tasks;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls;
 
 namespace client_ui.ViewModels;
 
 public class ListWindowViewModel : ReactiveObject
 {
     private readonly Connection? _activeConnection;
+    private readonly ListWindow _window;
+    public ReactiveCommand<Unit, Unit> RequestLeave { get; }
     public ObservableCollection<Row> RemotePeers { get; } = new();
 
-    public ListWindowViewModel(Connection? activeConnection)
+    public ListWindowViewModel(Connection? activeConnection, ListWindow window)
     {
         _activeConnection = activeConnection;
+        _window = window;
+
+        RequestLeave = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await activeConnection.AddTask(new ProtocolMessage(MessageType.Disconnect));
+            await Task.Delay(75);
+            _window.Exit();
+        });
     }
 
     public void RefreshList(IEnumerable<string> entries)
