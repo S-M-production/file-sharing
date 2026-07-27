@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using client_core.middleware;
 using network_core.core;
+using router_core.core;
+using client_core.logic;
 
 namespace client_ui.ViewModels;
 
@@ -15,6 +17,10 @@ public class MainWindowViewModel : ReactiveObject
     private string _portNumber = "";
     private Connection? _connection;
     private Middleware _middleware;
+
+    public RouterMap temp = new RouterMap();
+
+    public UserRequestCallBack caller;
 
     public string IpAddress
     {
@@ -52,8 +58,10 @@ public class MainWindowViewModel : ReactiveObject
 
         try
         {
+            caller = new UserRequestCallBack();
+            temp.AddRoute(format.core.MessageType.ConnectToUser, caller.UserRequestCall);
             //TODO: Initializr a middleware inside the class and store it for more distribution and object lifecycle stuff
-            var connection = await Connector.Connect(IpAddress, port, LoggerSingleton._instance, new Middleware());
+            var connection = await Connector.Connect(IpAddress, port, LoggerSingleton._instance, new Middleware(), temp);
             connection!.Start();
             LoggerSingleton._instance.LogInformation("Connected to server!!!");
             ActiveConnection = connection;
