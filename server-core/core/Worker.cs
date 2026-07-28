@@ -40,9 +40,9 @@ public class Worker
         _tcpClient = tcpClient;
         _logger = logger;
         _router = new ();
-        _router.AddRoute(format.core.MessageType.Disconnect, new UserRemoval(_connections).Remove);
         this._connections = connections;
-        _middleware = new Middleware(connections, (tcpClient.Client.RemoteEndPoint as IPEndPoint)!);
+        _router.AddRoute(format.core.MessageType.Disconnect, new UserRemoval(_connections).Remove);
+        _middleware = new Middleware(connections, tcpClient.Client.RemoteEndPoint as IPEndPoint );
         Connection= new Connection(tcpClient,logger,_middleware, _router);
         var temp = (tcpClient.Client.RemoteEndPoint as IPEndPoint)!;
         ClientAddress = temp.Address.MapToIPv4();

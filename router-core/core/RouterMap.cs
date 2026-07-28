@@ -62,7 +62,6 @@ public class RouterMap
             handle = null;
             return false;
         }
-
         if (wrap.TryUse(out handle)) return true;
         
         _map.TryRemove(type, out _);

@@ -63,6 +63,8 @@ public class Publisher(ILogger logger)
                 logger.LogInformation("Pub: {0} to all",ProtocolSerializer.ReadableSerialize(packet));
                 foreach (var worker in _workers)
                 {
+                    var temp = worker.ClientAddress.MapToIPv4().ToString() + ":" + worker._clientPort;
+                    if (System.Text.Encoding.UTF8.GetString(packet.Body) == temp) continue;
                     worker.Connection.AddTask(packet);
                 }
             }

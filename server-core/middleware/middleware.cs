@@ -53,8 +53,11 @@ public class Middleware:IMiddleware
                 var response = new ProtocolMessage(MessageType.ConnectToUser,
                     Encoding.UTF8.GetBytes(_ip.Address.MapToIPv4().ToString() + _ip.Port.ToString()));
                 worker.Connection.AddTask(response);
-                Console.WriteLine("Wrote: {0} to: {1}",ProtocolSerializer.ReadableSerialize(response),tempText);
                 return null;
+            case MessageType.Disconnect:
+                if(!routerMap.GetRoute(message.MessageType, out var temp)) return null;
+                message = new ProtocolMessage(message.MessageType, Encoding.UTF8.GetBytes(_ip.Address.MapToIPv4().ToString()+":"+ _ip.Port.ToString()));
+                return temp(message);
             default:
                 if(!routerMap.GetRoute(message.MessageType, out var handle)) return null;
                 return handle(message);
