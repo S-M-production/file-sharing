@@ -84,7 +84,7 @@ public partial class MainWindow : Window
                 var temp2 = temp.Split(":");
                 Dispatcher.UIThread.Post(() =>
                 {
-                    listWindowViewModel.RemoveEntry(temp2[0],int.Parse(temp2[1]));
+                    listWindowViewModel.RemoveEntry(temp2[0], int.Parse(temp2[1]));
                 });
                 
                 return null;
