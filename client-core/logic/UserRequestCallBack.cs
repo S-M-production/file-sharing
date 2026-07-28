@@ -1,17 +1,20 @@
+using System.Threading.Tasks;
 using format.core;
+using client_core.middleware;
+
 
 namespace client_core.logic;
 
-public class UserListCallBack
+public class UserRequestCallBack
 {
     public TaskCompletionSource<ProtocolMessage> _awaitingMessage { get; }
 
-    public UserListCallBack()
+    public UserRequestCallBack()
     {
         _awaitingMessage = new TaskCompletionSource<ProtocolMessage>();
     }
     
-    public ProtocolMessage? UserListCall(ProtocolMessage incomingMessage)
+    public ProtocolMessage? UserRequestCall(ProtocolMessage incomingMessage)
     {
         _awaitingMessage!.SetResult(incomingMessage);
         return null!;

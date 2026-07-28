@@ -5,7 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
-using client_core.router.logic;
+using client_core.logic;
 using client_ui.ViewModels;
 using format.core;
 using router_core.core;

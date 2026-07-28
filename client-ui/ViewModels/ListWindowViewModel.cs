@@ -6,6 +6,7 @@ using System.Linq;
 using network_core.core;
 using format.core;
 using System.Threading.Tasks;
+using client_core.logic;
 
 namespace client_ui.ViewModels;
 
@@ -76,7 +77,7 @@ public class ListWindowViewModel : ReactiveObject
     /// <param name="port">port yk</param>
     public void AddEntry(String ip, int port)
     {
-        RemotePeers.Add(new Row(ip, port, _activeConnection));
+        RemotePeers.Add(new Row(ip, port, _activeConnection,this));
     }
 
     /// <summary>
@@ -98,7 +99,7 @@ public class ListWindowViewModel : ReactiveObject
                 continue;
             }
 
-            RemotePeers.Add(new Row(parts[0], port, _activeConnection));
+            RemotePeers.Add(new Row(parts[0], port, _activeConnection,this));
         }
     }
 
