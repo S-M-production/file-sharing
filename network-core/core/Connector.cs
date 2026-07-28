@@ -25,9 +25,9 @@ public static class Connector
     /// <returns>Returns a connection object when a validated connection is estabalished</returns>
     /// <exception cref="TimeoutException">When connection takes over more time than timeout was set to, this is thrown</exception>
     /// <exception cref="Exception">Returns exception when server couldn't be validated</exception>
-    public static async Task<Connection?> Connect(string server, int port, ILogger logger, IMiddleware middleware)
+    public static async Task<Connection?> Connect(string server, int port, ILogger logger, IMiddleware middleware, RouterMap routerMap)
     {
-        Task<Connection?> result = ConnectToServer(server, port, logger, middleware);
+        Task<Connection?> result = ConnectToServer(server, port, logger, middleware,routerMap);
         await Task.Delay(Timeout*1000);
         if(!result.IsCompleted) throw new TimeoutException("Timeout waiting for connection");
         return result.Result;
@@ -39,7 +39,7 @@ public static class Connector
     /// <param name="port"></param>
     /// <param name="logger"></param>
     /// <returns>Returns a connection object when connection could be validated</returns>
-    private static async Task<Connection?> ConnectToServer(string server, int port, ILogger logger, IMiddleware middleware)
+    private static async Task<Connection?> ConnectToServer(string server, int port, ILogger logger, IMiddleware middleware,RouterMap routerMap)
     {
         var client = new TcpClient();
         await client.ConnectAsync(server, port);
@@ -54,7 +54,7 @@ public static class Connector
         Parser parser = new Parser(stream);
         ProtocolMessage response = await parser.Parse();
         
-        if (response.MessageType == MessageType.ConnectedToServer) return new Connection(client, logger,middleware, new RouterMap());
+        if (response.MessageType == MessageType.ConnectedToServer) return new Connection(client, logger,middleware, routerMap);
         logger.LogError($"Failed to connect to {server}:{port}, {ProtocolSerializer.ReadableSerialize(response)}");
         return null;
     }

@@ -1,7 +1,6 @@
 using System;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -25,7 +24,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            var viewModel = DataContext as MainWindowViewModel;
+            var viewModel = DataContext as MainWindowViewModel; // var here!!!!
 
             if (viewModel == null)
                 return;
@@ -63,8 +62,9 @@ public partial class MainWindow : Window
                 WindowStartupLocation = WindowStartupLocation.Manual,
                 Position = this.Position
             };
-            var listWindowViewModel = new ListWindowViewModel(connection, listWindow);
+            var listWindowViewModel = new ListWindowViewModel(connection, listWindow, viewModel.caller); //error here!!!
             listWindowViewModel.SetList(textList!);
+
             listWindow.DataContext = listWindowViewModel;
             listWindow.Show();
             Close();
