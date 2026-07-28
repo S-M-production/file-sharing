@@ -5,9 +5,11 @@ using System.Text.Json.Serialization;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using client_core.router.logic;
 using client_ui.ViewModels;
 using format.core;
+using router_core.core;
 
 namespace client_ui.mainWindow;
 
@@ -53,28 +55,42 @@ public partial class MainWindow : Window
             var awaitingList = await callBack._awaitingMessage.Task;
 
             var text = Encoding.UTF8.GetString(awaitingList.Body);
-
-            // Assuming response is:
-            // ["ip1","ip2"]
+            
             var textList = JsonSerializer.Deserialize<String[]>(text);
-            // var textList = text[1..^1]
-            //     .Replace("\"", "")
-            //     .Split(",");
-            //
+
             var listWindow = new listWindow.ListWindow
             {
                 WindowStartupLocation = WindowStartupLocation.Manual,
                 Position = this.Position
             };
             var listWindowViewModel = new ListWindowViewModel(connection, listWindow);
-            listWindowViewModel.RefreshList(textList);
+            listWindowViewModel.SetList(textList!);
             listWindow.DataContext = listWindowViewModel;
-
-            
-
             listWindow.Show();
-
-            this.Close();
+            Close();
+            MessageHandler AddElement = (message) =>
+            {
+                var temp = System.Text.Encoding.UTF8.GetString(message.Body);
+                var temp2 = temp.Split(":");
+                Dispatcher.UIThread.Post(() =>
+                {
+                listWindowViewModel.AddEntry(temp2[0],int.Parse(temp2[1]));
+                });
+                return null;
+            };
+            MessageHandler RemoveElement = (message) =>
+            {
+                var temp = System.Text.Encoding.UTF8.GetString(message.Body);
+                var temp2 = temp.Split(":");
+                Dispatcher.UIThread.Post(() =>
+                {
+                    listWindowViewModel.RemoveEntry(temp2[0],int.Parse(temp2[1]));
+                });
+                
+                return null;
+            };
+            viewModel.ActiveConnection!.RouterMap.AddRoute(MessageType.AddUserToList, AddElement);
+            viewModel.ActiveConnection.RouterMap.AddRoute(MessageType.RemoveUserFromList, RemoveElement);
         }
         catch (Exception ex)
         {
