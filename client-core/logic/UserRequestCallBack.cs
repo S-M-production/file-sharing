@@ -9,6 +9,9 @@ public class UserRequestCallBack
 {
     public TaskCompletionSource<ProtocolMessage> _awaitingMessage { get; }
 
+    // Optional UI notifier. UI can set this to be informed immediately when a request arrives.
+    public Action<ProtocolMessage>? OnIncomingRequest { get; set; }
+
     public UserRequestCallBack()
     {
         _awaitingMessage = new TaskCompletionSource<ProtocolMessage>();
@@ -17,6 +20,7 @@ public class UserRequestCallBack
     public ProtocolMessage? UserRequestCall(ProtocolMessage incomingMessage)
     {
         _awaitingMessage!.SetResult(incomingMessage);
+        OnIncomingRequest?.Invoke(incomingMessage);
         return null!;
     }
 }

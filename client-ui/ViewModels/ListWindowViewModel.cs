@@ -6,6 +6,7 @@ using System.Linq;
 using network_core.core;
 using format.core;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using client_core.logic;
 
 namespace client_ui.ViewModels;
@@ -31,6 +32,12 @@ public class ListWindowViewModel : ReactiveObject
         _activeConnection = activeConnection;
         _window = window;
         _userRequest = userRequest;
+
+        // Notify UI immediately when an incoming connect request arrives
+        _userRequest.OnIncomingRequest = (msg) => {
+            // Ensure running on UI thread
+            Dispatcher.UIThread.Post(() => Popup());
+        };
 
         RequestLeave = ReactiveCommand.CreateFromTask(async () =>
         {
