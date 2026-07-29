@@ -14,7 +14,7 @@ public static class Connector
     /// Amount of time the Connector will wait for connection to be created before ending it and returning a exception
     /// </summary>
     private const int Timeout = 1;
-
+    
     /// <summary>
     /// Creates a connection to the server and validates the server, returns a Connection object if it could be validated 
     /// </summary>
@@ -22,27 +22,14 @@ public static class Connector
     /// <param name="port">Port number</param>
     /// <param name="logger">ILogger that was created at initialization</param>
     /// <param name="middleware">Middleware created by program utilizing connector</param>
-    /// <returns>Returns a connection object when a validated connection is estabalished</returns>
-    /// <exception cref="TimeoutException">When connection takes over more time than timeout was set to, this is thrown</exception>
-    /// <exception cref="Exception">Returns exception when server couldn't be validated</exception>
-    public static async Task<Connection?> Connect(string server, int port, ILogger logger, IMiddleware middleware, RouterMap routerMap)
-    {
-        Task<Connection?> result = ConnectToServer(server, port, logger, middleware,routerMap);
-        await Task.Delay(Timeout*1000);
-        if(!result.IsCompleted) throw new TimeoutException("Timeout waiting for connection");
-        return result.Result;
-    }
-    /// <summary>
-    /// Logic to connect to server is housed here 
-    /// </summary>
-    /// <param name="server"></param>
-    /// <param name="port"></param>
-    /// <param name="logger"></param>
     /// <returns>Returns a connection object when connection could be validated</returns>
-    private static async Task<Connection?> ConnectToServer(string server, int port, ILogger logger, IMiddleware middleware,RouterMap routerMap)
+    public static async Task<Connection?> Connect(string server, int port, ILogger logger, IMiddleware middleware,RouterMap routerMap)
     {
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(Timeout)); 
+        CancellationToken ct = cts.Token;
+        
         var client = new TcpClient();
-        await client.ConnectAsync(server, port);
+        await client.ConnectAsync(server, port,ct);
         
         var stream = client.GetStream();
         

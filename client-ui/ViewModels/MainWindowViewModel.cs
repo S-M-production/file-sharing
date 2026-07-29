@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Avalonia;
 using ReactiveUI;
 using Microsoft.Extensions.Logging;
@@ -61,12 +62,23 @@ public class MainWindowViewModel : ReactiveObject
             caller = new UserRequestCallBack();
             temp.AddRoute(format.core.MessageType.ConnectToUser, caller.UserRequestCall);
             //TODO: Initializr a middleware inside the class and store it for more distribution and object lifecycle stuff
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             var connection = await Connector.Connect(IpAddress, port, LoggerSingleton._instance, new Middleware(), temp);
+            stopwatch.Stop();
+            
+            if (connection == null)
+            {
+                LoggerSingleton._instance.LogError("Failed to connect to server");
+                return false;
+            }
+            
+            LoggerSingleton._instance.LogInformation("Connection established in {Time} ms", stopwatch.ElapsedMilliseconds);
             connection!.Start();
             LoggerSingleton._instance.LogInformation("Connected to server!!!");
             ActiveConnection = connection;
         }
-        catch (TimeoutException e)
+        catch (OperationCanceledException e)
         {
             LoggerSingleton._instance.LogError("Timed out of server connection {}", e.Message);
             return false;
