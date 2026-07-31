@@ -29,9 +29,9 @@ public class Worker
     private TcpClient _tcpClient;
     private ILogger _logger;
     private readonly UserList _connections;
-    private readonly RouterMap _router;
+    private readonly RouterMap _router = new();
     private readonly HeartBeat _heartBeat;
-    private Task _heartBeatLoop;
+    private Task _heartBeatLoop = null!;
     private CancellationTokenSource _ctx = new();
     
     /// <summary>Constructor</summary>
@@ -40,13 +40,13 @@ public class Worker
     /// <param name="connections">List of all connections</param>
     public Worker(TcpClient tcpClient, ILogger logger, UserList connections)
     {
+        _ctx.Token.Register(async () => await RemoveRegisteredUser());
         _tcpClient = tcpClient;
         _logger = logger;
-        _router = new ();
         this._connections = connections;
         _router.AddRoute(format.core.MessageType.Disconnect, new UserRemoval(_connections).Remove);
-        _middleware = new Middleware(connections, tcpClient.Client.RemoteEndPoint as IPEndPoint );
-        Connection= new Connection(tcpClient,logger,_middleware, _router);
+        _middleware = new Middleware(connections, tcpClient.Client.RemoteEndPoint as IPEndPoint);
+        Connection= new Connection(tcpClient,logger,_middleware, _router,_ctx);
         _heartBeat = new HeartBeat(Connection,logger,_ctx);
         var temp = (tcpClient.Client.RemoteEndPoint as IPEndPoint)!;
         ClientAddress = temp.Address.MapToIPv4();
@@ -61,11 +61,20 @@ public class Worker
     /// </summary>
     public void Run()
     {
+        _logger.LogInformation($"Worker {ClientAddress}:{_clientPort} running...");
         RegisterUserConnection();
         _heartBeat.StartHeartBeatLoop();
         _heartBeatLoop = _heartBeat.HeartBeatLoopTask;
         Connection.Start();
     }
+
+    private async Task RemoveRegisteredUser()
+    {
+        _logger.LogInformation("Removing registered {}:{}", ClientAddress,_clientPort);
+        _connections.TryRemove($"{ClientAddress}:{_clientPort}", out _);
+        await Connection.GracefulStop();
+    }
+    
     /// <summary>
     /// Registers the users connection in the concurrent hashset
     /// </summary>

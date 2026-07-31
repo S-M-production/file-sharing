@@ -31,34 +31,60 @@ public class Connection
     public readonly int ClientPort;
     public IMiddleware Middleware { get; }
     public RouterMap RouterMap { get; } 
-    private int Started = 0;
+    private bool _started = false;
+    private bool _ended = false;
     private TaskCompletionSource isWriterCompleted = new TaskCompletionSource();
+    public CancellationTokenSource CancellationTokenSource { get; }
+    
     /// <summary>
     /// Sets up listening and writing loop for the connection
     /// </summary>
     /// <param name="client">TcpClient connection, Ideally should be a server connection that is validated through Connector</param>
     /// <param name="logger">ILogger that is passed down into here</param>
     /// <param name="middleware">Middleware provided by core utilizing this class</param>
+    /// <param name="routerMap">Router map the connection will use</param>
+    /// <param name="cancellationTokenSource">Way to cancel the Connection, or stop it</param>
     /// TODO: Use .NET DI for logger
-    public Connection(TcpClient client,ILogger logger,IMiddleware middleware, RouterMap routerMap)
+    public Connection(TcpClient client,ILogger logger,IMiddleware middleware, RouterMap routerMap,CancellationTokenSource cancellationTokenSource)
     {
         IPEndPoint clientInfo = (client.Client.RemoteEndPoint as IPEndPoint)!;
+        this.CancellationTokenSource = cancellationTokenSource;
         this.RouterMap = routerMap;
         ClientAddress = clientInfo.Address.MapToIPv4();
         ClientPort = clientInfo.Port;
         this._client = client;
         this.Middleware = middleware;
         _networkStream = client.GetStream();
-        _listener = new Listener(client,logger,this,RouterMap,middleware);
+        _listener = new Listener(client,logger,this,RouterMap,middleware,cancellationTokenSource);
         this._logger = logger;
     }
-
-    public void Start()
+    /// <summary>
+    /// Starts up async write and read loops
+    /// </summary>
+    public bool Start()
     {
-        if (Started != 0) return;
-        Started = 1;
+        if (_started) return false;
+        _started = true;
         _asyncLoopTask = StartAsyncWriteLoop();
         _listenerTask = _listener.Run();
+        return true;
+    }
+
+    /// <summary>
+    /// Gracefully stops the connection
+    /// </summary>
+    public async Task<bool> GracefulStop()
+    {
+        _logger.LogInformation($"Gracefully stopping connection to {ClientAddress}:{ClientPort}");
+        if (_ended) return false;
+        _ended = true;
+        await CancellationTokenSource.CancelAsync();
+        AddTask(new ProtocolMessage(MessageType.Disconnect));
+        CompleteQueue();
+        await _listenerTask;
+        await _asyncLoopTask;
+        _client.Close();
+        return true;
     }
 
     /// <summary>

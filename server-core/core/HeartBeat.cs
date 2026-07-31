@@ -14,7 +14,6 @@ public class HeartBeat
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _cancellationToken;
     private TaskCompletionSource _pongCallBack;
-    private TaskCompletionSource _shutDown;
     /// <summary>
     /// Task for the loop in case if its ever needed
     /// </summary>
@@ -45,11 +44,13 @@ public class HeartBeat
 
                 await Task.Delay((int)(HeartBeatInterval*1000));
                 
-                _connection.RouterMap.AddRoute(MessageType.Pong, messageHandler: (message) =>
-                {
-                    _pongCallBack.SetResult();
-                    return null;
-                });
+                _connection.RouterMap.AddRoute(MessageType.Pong,
+                    messageHandler: (message) =>
+                    {
+                        _pongCallBack.SetResult();
+                        return null;
+                    }, 
+                    1);
                 
                 TaskCompletionSource taskCompletionSource = _connection.AddTask(new ProtocolMessage(MessageType.Ping));
                 await taskCompletionSource.Task;
@@ -61,7 +62,6 @@ public class HeartBeat
                 }
                 catch (TimeoutException e)
                 {
-                    _shutDown.SetResult();
                     await _cancellationToken.CancelAsync();
                     break;
                 }

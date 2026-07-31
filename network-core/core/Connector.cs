@@ -40,8 +40,8 @@ public static class Connector
         
         Parser parser = new Parser(stream);
         ProtocolMessage response = await parser.Parse();
-        
-        if (response.MessageType == MessageType.ConnectedToServer) return new Connection(client, logger,middleware, routerMap);
+        //TODO: Replace the CancelationTokenSource with DI
+        if (response.MessageType == MessageType.ConnectedToServer) return new Connection(client, logger,middleware, routerMap,new CancellationTokenSource());
         logger.LogError($"Failed to connect to {server}:{port}, {ProtocolSerializer.ReadableSerialize(response)}");
         return null;
     }

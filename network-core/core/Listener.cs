@@ -19,6 +19,7 @@ public class Listener
     private readonly Parser _parser;
     private Connection _connection;
     private readonly IMiddleware _middleware;
+    public CancellationTokenSource CancellationTokenSource {get; }
 
     /// <summary>
     /// Router that belongs to one listening connection
@@ -33,14 +34,15 @@ public class Listener
     /// <param name="connection">A connection object for writing to client</param>
     /// <param name="routerMap">Router map the listener will use, needs to be passed in or else it cant be accessed outside</param>
     /// <param name="middleware">Middleware passed in</param>
+    /// <param name="cancellationTokenSource">Way to cancel the Listener, or stop it</param>
     /// <exception cref="IOException">When an improper TcpClient is inputted, one that doesn't return IP:PORT</exception>
-    public Listener(TcpClient tcpClient, ILogger logger,Connection connection,RouterMap routerMap,IMiddleware middleware)
+    public Listener(TcpClient tcpClient, ILogger logger,Connection connection,RouterMap routerMap,IMiddleware middleware, CancellationTokenSource cancellationTokenSource)
     {
         _tcpClient = tcpClient;
         this._logger = logger;
         this._connection = connection;
         _middleware = middleware;
-
+        this.CancellationTokenSource = cancellationTokenSource;
         IPEndPoint? clientInfo = tcpClient.Client.RemoteEndPoint as IPEndPoint;
         if (clientInfo == null) throw new IOException("Improper Connection???");
         
@@ -62,7 +64,7 @@ public class Listener
     /// </remarks>
     public async Task Run()
     {
-        while (true)
+        while (!CancellationTokenSource.IsCancellationRequested)
         {
             ProtocolMessage message;
             try
