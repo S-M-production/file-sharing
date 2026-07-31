@@ -12,7 +12,9 @@ public class HeartBeat
     private const double HeartBeatInterval = 1; //Seconds
     private readonly Connection _connection;
     private readonly ILogger _logger;
-
+    private readonly CancellationTokenSource _cancellationToken;
+    private TaskCompletionSource _pongCallBack;
+    private TaskCompletionSource _shutDown;
     /// <summary>
     /// Task for the loop in case if its ever needed
     /// </summary>
@@ -23,10 +25,12 @@ public class HeartBeat
     /// </summary>
     /// <param name="connection">Connection object representing a connection to valid server</param>
     /// <param name="logger">Logger created at start of program</param>
-    public HeartBeat(Connection connection,ILogger logger)
+    /// <param name="cancellationToken">If the heartbeat detects client wrongfully disconnects, this will be set</param>
+    public HeartBeat(Connection connection,ILogger logger, CancellationTokenSource cancellationToken)
     {
         this._connection = connection;
         _logger = logger;
+        _cancellationToken = cancellationToken;
     }
     /// <summary>
     /// Sends a heartbeat Ping message every few HeartBeatInterval seconds
@@ -37,9 +41,30 @@ public class HeartBeat
         {
             while (true)
             {
+                _pongCallBack = new TaskCompletionSource();
+
                 await Task.Delay((int)(HeartBeatInterval*1000));
+                
+                _connection.RouterMap.AddRoute(MessageType.Pong, messageHandler: (message) =>
+                {
+                    _pongCallBack.SetResult();
+                    return null;
+                });
+                
                 TaskCompletionSource taskCompletionSource = _connection.AddTask(new ProtocolMessage(MessageType.Ping));
                 await taskCompletionSource.Task;
+                
+                Task pongTask = _pongCallBack.Task;
+                try
+                {
+                    await pongTask.WaitAsync(TimeSpan.FromSeconds(HeartBeatInterval));
+                }
+                catch (TimeoutException e)
+                {
+                    _shutDown.SetResult();
+                    await _cancellationToken.CancelAsync();
+                    break;
+                }
                 _logger.LogInformation($"Sent heartbeat to {_connection.ClientAddress}:{_connection.ClientPort}");
             }
         });
