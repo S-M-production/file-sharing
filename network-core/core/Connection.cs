@@ -5,6 +5,7 @@ using format.core;
 using Microsoft.Extensions.Logging;
 using router_core.core;
 using router_core.middleware;
+using network_core.call_back;
 
 namespace network_core.core;
 /// <summary>
@@ -20,14 +21,14 @@ public class Connection
     /// <summary>
     /// Thread safe Queue for connection to write a message at a time to client
     /// </summary>
-    public readonly Channel<ProtocolMessage> TaskQueue = Channel.CreateUnbounded<ProtocolMessage>();
+    public readonly Channel<CallBackTask> TaskQueue = Channel.CreateUnbounded<CallBackTask>();
     private Task _asyncLoopTask = null!;
     private Listener _listener;
     private Task _listenerTask = null!;
     private readonly TcpClient _client;
     private readonly ILogger _logger;
-    private readonly IPAddress _clientAddress;
-    private readonly int _clientPort;
+    public readonly IPAddress ClientAddress;
+    public readonly int ClientPort;
     public IMiddleware Middleware { get; }
     public RouterMap RouterMap { get; } 
     private int Started = 0;
@@ -43,8 +44,8 @@ public class Connection
     {
         IPEndPoint clientInfo = (client.Client.RemoteEndPoint as IPEndPoint)!;
         this.RouterMap = routerMap;
-        _clientAddress = clientInfo.Address.MapToIPv4();
-        _clientPort = clientInfo.Port;
+        ClientAddress = clientInfo.Address.MapToIPv4();
+        ClientPort = clientInfo.Port;
         this._client = client;
         this.Middleware = middleware;
         _networkStream = client.GetStream();
@@ -58,15 +59,17 @@ public class Connection
         Started = 1;
         _asyncLoopTask = StartAsyncWriteLoop();
         _listenerTask = _listener.Run();
-    } 
-    
+    }
+
     /// <summary>
     /// Puts message into a ordered queue that will serialize messages one at a time 
     /// </summary>
     /// <param name="protocolMessage">Message that needs to be sent</param>
-    public void AddTask(ProtocolMessage protocolMessage)
+    public TaskCompletionSource AddTask(ProtocolMessage protocolMessage)
     {
-        TaskQueue.Writer.TryWrite(protocolMessage);
+        TaskCompletionSource tcs = new TaskCompletionSource();
+        TaskQueue.Writer.TryWrite(new CallBackTask(protocolMessage, tcs));
+        return tcs;
     }
     /// <summary>
     /// Way to end the queue
@@ -87,11 +90,12 @@ public class Connection
     /// </summary>
     async Task StartAsyncWriteLoop()
     {
-        await foreach (ProtocolMessage packet in TaskQueue.Reader.ReadAllAsync())
+        await foreach (CallBackTask call in TaskQueue.Reader.ReadAllAsync())
         {
-            byte[] buffer = ProtocolSerializer.Serialize(packet);
+            byte[] buffer = ProtocolSerializer.Serialize(call.ProtocolMessage);
             await _networkStream.WriteAsync(buffer, 0, buffer.Length);   
-            _logger.LogInformation("Wrote: {0} to {1}:{2}",ProtocolSerializer.ReadableSerialize(packet),_clientAddress,_clientPort);
+            _logger.LogInformation("Wrote: {0} to {1}:{2}",ProtocolSerializer.ReadableSerialize(call.ProtocolMessage),ClientAddress,ClientPort);
+            call.Completed();
         }
         isWriterCompleted.TrySetResult();
     }

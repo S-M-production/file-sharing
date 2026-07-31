@@ -45,7 +45,7 @@ public class Worker
         _router.AddRoute(format.core.MessageType.Disconnect, new UserRemoval(_connections).Remove);
         _middleware = new Middleware(connections, tcpClient.Client.RemoteEndPoint as IPEndPoint );
         Connection= new Connection(tcpClient,logger,_middleware, _router);
-        _heartBeat = new HeartBeat(Connection);
+        _heartBeat = new HeartBeat(Connection,logger);
         var temp = (tcpClient.Client.RemoteEndPoint as IPEndPoint)!;
         ClientAddress = temp.Address.MapToIPv4();
         _clientPort = temp.Port;

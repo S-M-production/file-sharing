@@ -20,6 +20,10 @@ public class Middleware:IMiddleware
     /// <returns>returns null if it couldn't be retrieved, returns a protocol message when the handle returns something</returns>
     public async Task<ProtocolMessage?> GetResponse(ProtocolMessage message,RouterMap routerMap)
     {
+        if (message.MessageType == MessageType.Ping)
+        {
+            return new ProtocolMessage(MessageType.Pong);
+        }
         //TODO: Fill out middleware if statement logic
         if(!routerMap.GetRoute(message.MessageType, out var handle)) return null;
         return handle!(message);

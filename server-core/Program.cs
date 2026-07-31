@@ -17,7 +17,14 @@ public class Program
     /// <param name="args">takes args "'ip' 'port'"</param>
     public static async Task Main(string[] args)
     {
-        using var factory = LoggerFactory.Create(builder => builder.AddConsole());
+        using var factory = LoggerFactory.Create(builder =>
+        {
+            builder.AddSimpleConsole(options =>
+            {
+                options.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
+                options.UseUtcTimestamp = false;
+            });
+        });
         ILogger logger = factory.CreateLogger<Program>();
 
         if (args.Length != 2)
@@ -30,7 +37,9 @@ public class Program
         {
             _address = IPAddress.Parse(args[0]);
             _port = int.Parse(args[1]);    
-        }catch (Exception e){
+        }
+        catch (Exception)
+        {
             logger.LogError("\nPlease input \'ip address\' \'port\'");
             return;
         }
