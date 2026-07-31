@@ -2,10 +2,10 @@ using format.core;
 
 namespace network_core.call_back;
 
-public record CallBackTask(ProtocolMessage ProtocolMessage, TaskCompletionSource TaskCompletionSource)
+public record CallBackTask(ProtocolMessage ProtocolMessage, TaskCompletionSource<bool> TaskCompletionSource)
 {
-    public void Completed()
+    public void SetCompletionSource(bool value = true)
     {
-        TaskCompletionSource.TrySetResult();
+        TaskCompletionSource.TrySetResult(value);
     }
 }

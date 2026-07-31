@@ -28,26 +28,25 @@ public class Worker
     private readonly Middleware _middleware;
     private TcpClient _tcpClient;
     private ILogger _logger;
+    private Task disposeAwaitLoopTask;
     private readonly UserList _connections;
     private readonly RouterMap _router = new();
     private readonly HeartBeat _heartBeat;
     private Task _heartBeatLoop = null!;
-    private CancellationTokenSource _ctx = new();
-    
+    private readonly TaskCompletionSource _cancellationToken = new();
     /// <summary>Constructor</summary>
     /// <param name="tcpClient">Connection to client</param>
     /// <param name="logger">Logger created at the start of program</param>
     /// <param name="connections">List of all connections</param>
     public Worker(TcpClient tcpClient, ILogger logger, UserList connections)
     {
-        _ctx.Token.Register(async () => await RemoveRegisteredUser());
         _tcpClient = tcpClient;
         _logger = logger;
         this._connections = connections;
         _router.AddRoute(format.core.MessageType.Disconnect, new UserRemoval(_connections).Remove);
         _middleware = new Middleware(connections, tcpClient.Client.RemoteEndPoint as IPEndPoint);
-        Connection= new Connection(tcpClient,logger,_middleware, _router,_ctx);
-        _heartBeat = new HeartBeat(Connection,logger,_ctx);
+        Connection= new Connection(tcpClient,logger,_middleware, _router);
+        _heartBeat = new HeartBeat(Connection,logger, _cancellationToken);
         var temp = (tcpClient.Client.RemoteEndPoint as IPEndPoint)!;
         ClientAddress = temp.Address.MapToIPv4();
         _clientPort = temp.Port;
@@ -66,13 +65,25 @@ public class Worker
         _heartBeat.StartHeartBeatLoop();
         _heartBeatLoop = _heartBeat.HeartBeatLoopTask;
         Connection.Start();
+        disposeAwaitLoopTask = DisposeAwaitLoop();
     }
 
-    private async Task RemoveRegisteredUser()
+    private async Task DisposeAwaitLoop()
     {
-        _logger.LogInformation("Removing registered {}:{}", ClientAddress,_clientPort);
-        _connections.TryRemove($"{ClientAddress}:{_clientPort}", out _);
+        await _cancellationToken.Task;
+        _logger.LogInformation("Removing {}:{}", ClientAddress,_clientPort);
+        RemoveRegisteredUser();
         await Connection.GracefulStop();
+        _logger.LogInformation("Gracefully stopped {}:{}", ClientAddress,_clientPort);
+    }
+    
+    /// <summary>
+    /// Removes the registered user from the connections list
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    private void RemoveRegisteredUser()
+    {
+        _connections.TryRemove($"{ClientAddress}:{_clientPort}", out _);
     }
     
     /// <summary>

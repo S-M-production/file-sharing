@@ -12,8 +12,11 @@ public class HeartBeat
     private const double HeartBeatInterval = 1; //Seconds
     private readonly Connection _connection;
     private readonly ILogger _logger;
-    private readonly CancellationTokenSource _cancellationToken;
-    private TaskCompletionSource _pongCallBack;
+    private readonly TaskCompletionSource _cancellationToken;
+    private TaskCompletionSource _pongCallBack = null!;
+    private int _failedSend = 0;
+    private int _failedSendCap = 3;
+
     /// <summary>
     /// Task for the loop in case if its ever needed
     /// </summary>
@@ -25,7 +28,7 @@ public class HeartBeat
     /// <param name="connection">Connection object representing a connection to valid server</param>
     /// <param name="logger">Logger created at start of program</param>
     /// <param name="cancellationToken">If the heartbeat detects client wrongfully disconnects, this will be set</param>
-    public HeartBeat(Connection connection,ILogger logger, CancellationTokenSource cancellationToken)
+    public HeartBeat(Connection connection,ILogger logger, TaskCompletionSource cancellationToken)
     {
         this._connection = connection;
         _logger = logger;
@@ -52,8 +55,19 @@ public class HeartBeat
                     }, 
                     1);
                 
-                TaskCompletionSource taskCompletionSource = _connection.AddTask(new ProtocolMessage(MessageType.Ping));
-                await taskCompletionSource.Task;
+                var taskCompletionSource = await _connection.AddTask(new ProtocolMessage(MessageType.Ping)).Task;
+                
+                if (!taskCompletionSource)
+                {
+                    _logger.LogError($"Failed to send pong call to heartbeat.... retry no. {++_failedSend}");
+                    if (_failedSend >= _failedSendCap)
+                    {
+                        _logger.LogError($"Failed to send pong call to heartbeat {_failedSendCap} times");
+                        _cancellationToken.SetResult();
+                        break;
+                    }
+                    continue;
+                }
                 
                 Task pongTask = _pongCallBack.Task;
                 try
@@ -62,7 +76,8 @@ public class HeartBeat
                 }
                 catch (TimeoutException e)
                 {
-                    await _cancellationToken.CancelAsync();
+                    _logger.LogError("Notifying disrupted Heartbeat");
+                    _cancellationToken.SetResult();
                     break;
                 }
                 _logger.LogInformation($"Sent heartbeat to {_connection.ClientAddress}:{_connection.ClientPort}");

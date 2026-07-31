@@ -21,9 +21,9 @@ public class Connection
     /// <summary>
     /// Thread safe Queue for connection to write a message at a time to client
     /// </summary>
-    public readonly Channel<CallBackTask> TaskQueue = Channel.CreateUnbounded<CallBackTask>();
+    private readonly Channel<CallBackTask> _taskQueue = Channel.CreateUnbounded<CallBackTask>();
     private Task _asyncLoopTask = null!;
-    private Listener _listener;
+    private readonly Listener _listener;
     private Task _listenerTask = null!;
     private readonly TcpClient _client;
     private readonly ILogger _logger;
@@ -33,9 +33,9 @@ public class Connection
     public RouterMap RouterMap { get; } 
     private bool _started = false;
     private bool _ended = false;
-    private TaskCompletionSource isWriterCompleted = new TaskCompletionSource();
-    public CancellationTokenSource CancellationTokenSource { get; }
-    
+    private readonly TaskCompletionSource _isWriterCompleted = new TaskCompletionSource();
+    private CancellationTokenSource CancellationTokenSource { get; } = new();
+    private int _awaitTime = 1; ///How long the writeAsync can wait upto
     /// <summary>
     /// Sets up listening and writing loop for the connection
     /// </summary>
@@ -43,19 +43,17 @@ public class Connection
     /// <param name="logger">ILogger that is passed down into here</param>
     /// <param name="middleware">Middleware provided by core utilizing this class</param>
     /// <param name="routerMap">Router map the connection will use</param>
-    /// <param name="cancellationTokenSource">Way to cancel the Connection, or stop it</param>
     /// TODO: Use .NET DI for logger
-    public Connection(TcpClient client,ILogger logger,IMiddleware middleware, RouterMap routerMap,CancellationTokenSource cancellationTokenSource)
+    public Connection(TcpClient client,ILogger logger,IMiddleware middleware, RouterMap routerMap)
     {
         IPEndPoint clientInfo = (client.Client.RemoteEndPoint as IPEndPoint)!;
-        this.CancellationTokenSource = cancellationTokenSource;
         this.RouterMap = routerMap;
         ClientAddress = clientInfo.Address.MapToIPv4();
         ClientPort = clientInfo.Port;
         this._client = client;
         this.Middleware = middleware;
         _networkStream = client.GetStream();
-        _listener = new Listener(client,logger,this,RouterMap,middleware,cancellationTokenSource);
+        _listener = new Listener(client,logger,this,RouterMap,middleware,CancellationTokenSource);
         this._logger = logger;
     }
     /// <summary>
@@ -75,11 +73,11 @@ public class Connection
     /// </summary>
     public async Task<bool> GracefulStop()
     {
-        _logger.LogInformation($"Gracefully stopping connection to {ClientAddress}:{ClientPort}");
         if (_ended) return false;
+        _logger.LogInformation($"Gracefully stopping connection to {ClientAddress}:{ClientPort}");
         _ended = true;
         await CancellationTokenSource.CancelAsync();
-        AddTask(new ProtocolMessage(MessageType.Disconnect));
+        _ = AddTask(new ProtocolMessage(MessageType.Disconnect));
         CompleteQueue();
         await _listenerTask;
         await _asyncLoopTask;
@@ -91,10 +89,10 @@ public class Connection
     /// Puts message into a ordered queue that will serialize messages one at a time 
     /// </summary>
     /// <param name="protocolMessage">Message that needs to be sent</param>
-    public TaskCompletionSource AddTask(ProtocolMessage protocolMessage)
+    public TaskCompletionSource<bool> AddTask(ProtocolMessage protocolMessage)
     {
-        TaskCompletionSource tcs = new TaskCompletionSource();
-        TaskQueue.Writer.TryWrite(new CallBackTask(protocolMessage, tcs));
+        TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+        _taskQueue.Writer.TryWrite(new CallBackTask(protocolMessage, tcs));
         return tcs;
     }
     /// <summary>
@@ -102,12 +100,12 @@ public class Connection
     /// </summary>
     public bool CompleteQueue()
     {
-        return TaskQueue.Writer.TryComplete();
+        return _taskQueue.Writer.TryComplete();
     }
 
     public async Task CompleteCallBack()
     {
-        await isWriterCompleted.Task;
+        await _isWriterCompleted.Task;
         
     }
     
@@ -116,14 +114,28 @@ public class Connection
     /// </summary>
     async Task StartAsyncWriteLoop()
     {
-        await foreach (CallBackTask call in TaskQueue.Reader.ReadAllAsync())
+        await foreach (CallBackTask call in _taskQueue.Reader.ReadAllAsync())
         {
             byte[] buffer = ProtocolSerializer.Serialize(call.ProtocolMessage);
-            await _networkStream.WriteAsync(buffer, 0, buffer.Length);   
+            try
+            {
+                await _networkStream.WriteAsync(buffer, 0, buffer.Length).WaitAsync(TimeSpan.FromSeconds(_awaitTime));
+            }
+            catch (Exception e) when (e is IOException || e is TimeoutException)
+            {
+                _logger.LogError(e.Message);
+                call.SetCompletionSource(false);
+                continue;
+            }catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                call.SetCompletionSource(false);
+                continue;
+            }
             _logger.LogInformation("Wrote: {0} to {1}:{2}",ProtocolSerializer.ReadableSerialize(call.ProtocolMessage),ClientAddress,ClientPort);
-            call.Completed();
+            call.SetCompletionSource();
         }
-        isWriterCompleted.TrySetResult();
+        _isWriterCompleted.TrySetResult();
     }
     
 }
