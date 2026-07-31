@@ -74,7 +74,7 @@ public class MainWindowViewModel : ReactiveObject
             }
             
             LoggerSingleton._instance.LogInformation("Connection established in {Time} ms", stopwatch.ElapsedMilliseconds);
-            connection!.Start();
+            connection!.Start(false);
             LoggerSingleton._instance.LogInformation("Connected to server!!!");
             ActiveConnection = connection;
         }

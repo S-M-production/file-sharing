@@ -58,7 +58,8 @@ public class Worker
     public void Run()
     {
         RegisterUserConnection();
-        Connection.Start(false);
+        //Using heartbeat
+        Connection.Start();
         
     }
     /// <summary>
