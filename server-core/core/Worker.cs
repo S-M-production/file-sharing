@@ -30,6 +30,7 @@ public class Worker
     private ILogger _logger;
     private readonly UserList _connections;
     private readonly RouterMap _router;
+    private readonly HeartBeat _heartBeat;
     
     /// <summary>Constructor</summary>
     /// <param name="tcpClient">Connection to client</param>
@@ -44,6 +45,7 @@ public class Worker
         _router.AddRoute(format.core.MessageType.Disconnect, new UserRemoval(_connections).Remove);
         _middleware = new Middleware(connections, tcpClient.Client.RemoteEndPoint as IPEndPoint );
         Connection= new Connection(tcpClient,logger,_middleware, _router);
+        _heartBeat = new HeartBeat(Connection);
         var temp = (tcpClient.Client.RemoteEndPoint as IPEndPoint)!;
         ClientAddress = temp.Address.MapToIPv4();
         _clientPort = temp.Port;
@@ -58,9 +60,8 @@ public class Worker
     public void Run()
     {
         RegisterUserConnection();
-        //Using heartbeat
+        _heartBeat.StartHeartBeatLoop();
         Connection.Start();
-        
     }
     /// <summary>
     /// Registers the users connection in the concurrent hashset

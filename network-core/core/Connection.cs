@@ -25,7 +25,6 @@ public class Connection
     private Listener _listener;
     private Task _listenerTask = null!;
     private readonly TcpClient _client;
-    private HeartBeat _heartBeat = null!;
     private readonly ILogger _logger;
     private readonly IPAddress _clientAddress;
     private readonly int _clientPort;
@@ -53,14 +52,12 @@ public class Connection
         this._logger = logger;
     }
 
-    public void Start(bool heartbeat = true)
+    public void Start()
     {
         if (Started != 0) return;
         Started = 1;
         _asyncLoopTask = StartAsyncWriteLoop();
         _listenerTask = _listener.Run();
-        if (!heartbeat) return;
-        _heartBeat = new HeartBeat(this);
     } 
     
     /// <summary>
