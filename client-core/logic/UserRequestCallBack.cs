@@ -14,7 +14,8 @@ public class UserRequestCallBack
 
     public UserRequestCallBack()
     {
-        _awaitingMessage = new TaskCompletionSource<ProtocolMessage>();
+        _awaitingMessage = new TaskCompletionSource<ProtocolMessage>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
     }
     
     public ProtocolMessage? UserRequestCall(ProtocolMessage incomingMessage)
@@ -23,7 +24,7 @@ public class UserRequestCallBack
 
         Console.WriteLine("Incoming connection request from: {0}", senderAddress);
         
-        _awaitingMessage!.SetResult(incomingMessage);
+        _awaitingMessage!.TrySetResult(incomingMessage);
         OnIncomingRequest?.Invoke(incomingMessage);
 
         return null!;

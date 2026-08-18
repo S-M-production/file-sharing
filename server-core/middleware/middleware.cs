@@ -51,7 +51,7 @@ public class Middleware:IMiddleware
             case MessageType.ConnectToUser:
                 if (!_userList.TryGetValue(tempText, out Worker worker)) return new ProtocolMessage(MessageType.UserNotFound);
                 var response = new ProtocolMessage(MessageType.ConnectToUser,
-                    Encoding.UTF8.GetBytes(_ip.Address.MapToIPv4().ToString() + _ip.Port.ToString()));
+                    Encoding.UTF8.GetBytes(_ip.Address.MapToIPv4().ToString() + ":" + _ip.Port.ToString()));
                 worker.Connection.AddTask(response);
                 return null;
             case MessageType.Disconnect:

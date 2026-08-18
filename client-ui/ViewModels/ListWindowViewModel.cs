@@ -131,6 +131,7 @@ public class Row : ReactiveObject
 {
     private readonly ListWindowViewModel _parent;
     private string _buttonText = "Request Connect";
+    private bool _requestPending;
     /// <summary>
     /// The ip (IPv4 . . . .) that belongs to the user the row belongs to
     /// </summary>
@@ -157,6 +158,10 @@ public class Row : ReactiveObject
 
         RequestConnectCommand = ReactiveCommand.Create(() =>
         {
+            if (_requestPending)
+                return;
+
+            _requestPending = true;
             ButtonText = "Waiting for responce";
 
             try

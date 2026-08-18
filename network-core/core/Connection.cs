@@ -22,6 +22,7 @@ public class Connection
     /// Thread safe Queue for connection to write a message at a time to client
     /// </summary>
     private readonly Channel<CallBackTask> _taskQueue = Channel.CreateUnbounded<CallBackTask>();
+    private readonly Channel<CallBackTask> _priorityTaskQueue = Channel.CreateUnbounded<CallBackTask>();
     private Task _asyncLoopTask = null!;
     private readonly Listener _listener;
     private Task _listenerTask = null!;
@@ -89,10 +90,14 @@ public class Connection
     /// Puts message into a ordered queue that will serialize messages one at a time 
     /// </summary>
     /// <param name="protocolMessage">Message that needs to be sent</param>
-    public TaskCompletionSource<bool> AddTask(ProtocolMessage protocolMessage)
+    public TaskCompletionSource<bool> AddTask(ProtocolMessage protocolMessage, bool priority = false)
     {
         TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-        _taskQueue.Writer.TryWrite(new CallBackTask(protocolMessage, tcs));
+        var task = new CallBackTask(protocolMessage, tcs);
+        if (priority)
+            _priorityTaskQueue.Writer.TryWrite(task);
+        else
+            _taskQueue.Writer.TryWrite(task);
         return tcs;
     }
     /// <summary>
@@ -100,6 +105,7 @@ public class Connection
     /// </summary>
     public bool CompleteQueue()
     {
+        _priorityTaskQueue.Writer.TryComplete();
         return _taskQueue.Writer.TryComplete();
     }
 
@@ -114,7 +120,8 @@ public class Connection
     /// </summary>
     async Task StartAsyncWriteLoop()
     {
-        await foreach (CallBackTask call in _taskQueue.Reader.ReadAllAsync())
+        CallBackTask? call;
+        while ((call = await TryReadNextTask()) != null)
         {
             byte[] buffer = ProtocolSerializer.Serialize(call.ProtocolMessage);
             try
@@ -136,6 +143,24 @@ public class Connection
             call.SetCompletionSource();
         }
         _isWriterCompleted.TrySetResult();
+    }
+
+    private async Task<CallBackTask?> TryReadNextTask()
+    {
+        while (true)
+        {
+            if (_priorityTaskQueue.Reader.TryRead(out CallBackTask? priorityTask))
+                return priorityTask;
+            if (_taskQueue.Reader.TryRead(out CallBackTask? task))
+                return task;
+
+            if (_priorityTaskQueue.Reader.Completion.IsCompleted && _taskQueue.Reader.Completion.IsCompleted)
+                return null;
+
+            await Task.WhenAny(
+                _priorityTaskQueue.Reader.WaitToReadAsync().AsTask(),
+                _taskQueue.Reader.WaitToReadAsync().AsTask());
+        }
     }
     
 }
