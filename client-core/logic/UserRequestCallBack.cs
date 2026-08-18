@@ -19,8 +19,13 @@ public class UserRequestCallBack
     
     public ProtocolMessage? UserRequestCall(ProtocolMessage incomingMessage)
     {
+        string senderAddress = System.Text.Encoding.UTF8.GetString(incomingMessage.Body);
+
+        Console.WriteLine("Incoming connection request from: {0}", senderAddress);
+        
         _awaitingMessage!.SetResult(incomingMessage);
         OnIncomingRequest?.Invoke(incomingMessage);
+
         return null!;
     }
 }
