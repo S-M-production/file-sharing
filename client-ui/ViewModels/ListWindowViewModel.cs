@@ -20,11 +20,18 @@ public class ListWindowViewModel : ReactiveObject
     public ObservableCollection<Row> RemotePeers { get; } = new();
 
     private bool _isPopupOpen;
+    private string _incomingRequestSender = "";
 
     public bool IsPopupOpen
     {
         get => _isPopupOpen;
         set => this.RaiseAndSetIfChanged(ref _isPopupOpen, value);
+    }
+
+    public string IncomingRequestSender
+    {
+        get => _incomingRequestSender;
+        private set => this.RaiseAndSetIfChanged(ref _incomingRequestSender, value);
     }
 
     public ListWindowViewModel(Connection? activeConnection, listWindow.ListWindow window, UserRequestCallBack userRequest)
@@ -36,7 +43,7 @@ public class ListWindowViewModel : ReactiveObject
         // Notify UI immediately when an incoming connect request arrives
         _userRequest.OnIncomingRequest = (msg) => {
             // Ensure running on UI thread
-            Dispatcher.UIThread.Post(() => Popup());
+            Dispatcher.UIThread.Post(() => popup(msg));
         };
 
         RequestLeave = ReactiveCommand.CreateFromTask(async () =>
@@ -116,13 +123,14 @@ public class ListWindowViewModel : ReactiveObject
 
         ProtocolMessage msg = await _userRequest._awaitingMessage.Task;
         Console.WriteLine("after callback");
-        Popup();
+        popup(msg);
 
         return null;
     }
 
-    private void Popup()
+    private void popup(ProtocolMessage message)
     {
+        IncomingRequestSender = System.Text.Encoding.UTF8.GetString(message.Body);
         IsPopupOpen = true;
     } 
 }

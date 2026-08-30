@@ -69,7 +69,12 @@
             VerticalAlignment = "Top">
                 <Border Background = "#575757" Padding = "10" CornerRadius = "6">
                     <StackPanel Spacing = "4">
-                        <TextBlock Text = "tuff"/>
+                        <TextBlock Text = "Connection request from:"/>
+                        <TextBlock Text = "{Binding IncomingRequestSender}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content = "Yes" Command = "{Binding}"/>
+                            <Button Content = "No" Command = "{Binding}"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </Popup>
