@@ -68,6 +68,7 @@ jobs:
         push: true
         platforms: |
           linux/amd64
+          linux/arm64
         tags: |
           munna00/file-sharing-server:latest 
           munna00/file-sharing-server:${{ github.sha }} 
