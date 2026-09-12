@@ -1,8 +1,12 @@
-- name: Home
+- name: Getting Started
   href: introduction.md
 
-- name: Getting Started
-  href: getting-started.md
+- name: Readme
+  href: README.md
 
+- name: Quick Start
+  href: quick-start.md
+  
 - name: API Reference
   href: api/toc.yml
+  
