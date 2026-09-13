@@ -1,20 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "client-core", "client-core\client-core.csproj", "{0ED34DFA-0887-481C-A532-CA8C53A96A68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "client-core", "src\main\client-core\client-core.csproj", "{0ED34DFA-0887-481C-A532-CA8C53A96A68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "server-core", "server-core\server-core.csproj", "{3DBFC068-BA05-4518-BCFE-598A0BAA7180}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "server-core", "src\main\server-core\server-core.csproj", "{3DBFC068-BA05-4518-BCFE-598A0BAA7180}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "format", "format\format.csproj", "{78EBBF6A-725D-4161-93F6-8E60557EA0A0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "format", "src\main\format\format.csproj", "{78EBBF6A-725D-4161-93F6-8E60557EA0A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "server-core-test", "server-core-test\server-core-test.csproj", "{5EBFCC20-B007-4DA9-B983-AB721C0531CA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "server-core-test", "src\test\server-core-test\server-core-test.csproj", "{5EBFCC20-B007-4DA9-B983-AB721C0531CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "format-test", "format-test\format-test.csproj", "{0A622B08-4FB4-4E83-A7D1-76E9DE00DC9A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "format-test", "src\test\format-test\format-test.csproj", "{0A622B08-4FB4-4E83-A7D1-76E9DE00DC9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "client-ui", "client-ui\client-ui.csproj", "{2909085C-25F2-43D5-B3AE-924336F73673}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "client-ui", "src\main\client-ui\client-ui.csproj", "{2909085C-25F2-43D5-B3AE-924336F73673}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "network-core", "network-core\network-core.csproj", "{B07D7639-BDA6-4C35-BEC9-4255FE51FF6A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "network-core", "src\main\network-core\network-core.csproj", "{B07D7639-BDA6-4C35-BEC9-4255FE51FF6A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "router-core", "router-core\router-core.csproj", "{B34A195A-E1E9-4CD0-8A6C-4C23F9EC535C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "router-core", "src\main\router-core\router-core.csproj", "{B34A195A-E1E9-4CD0-8A6C-4C23F9EC535C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
