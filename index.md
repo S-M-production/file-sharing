@@ -18,13 +18,13 @@ What does it do:
 Quick Start
 -
 
-[This page will cover how to setup the server and client](https://file-sharing-docs.samarthhk.dev/quick-start.html)
+[This page will cover how to setup the server and client](~/quick-start.html)
 
 How it works
 -
 
-[This page will cover the architecure and how the program works](https://file-sharing-docs.samarthhk.dev/architecture-overview.html)
+[This page will cover the architecure and how the program works](~/architecture-overview.html)
 
 Documentation Sections
 -
-[This page will cover the different sections of the documentation](https://file-sharing-docs.samarthhk.dev/docs-toc.html)
+[This page will cover the different sections of the documentation](~/docs-toc.html)
