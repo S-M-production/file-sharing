@@ -1,0 +1,35 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:client_ui.ViewModels;assembly=client-ui"
+        x:DataType="vm:MainWindowViewModel"
+        x:Class="client_ui.mainWindow.MainWindow"
+        Title="client_ui"
+        CanResize="False"
+        WindowDecorations ="None"
+        Width="610" Height="128">
+    <Border BorderBrush="#1B1E26" BorderThickness="0,8,0,0" Padding = "3" PointerPressed="OnDragWindow">
+        <StackPanel Orientation="Vertical">
+
+            <Grid>
+                <TextBlock Text="FILE  SHARING  APP" FontSize="35" LetterSpacing="6" FontFamily="{StaticResource BebasNeue}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,15"/>
+                <Button Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Top" Click="OnCloseClicked" Background="Purple">
+                    <TextBlock Text="X" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                </Button>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal" Spacing="2" Margin="0,0,0,0">
+
+                <TextBlock Width="25" Margin="12.5,0,0,0" VerticalAlignment="Center">IP:</TextBlock>
+                <TextBox Height="25" Width="200" PlaceholderText="Enter your IP address" Text="{Binding IpAddress, Mode=TwoWay}"/>
+                <TextBlock Width="35" Margin="7.5,0,0,0" VerticalAlignment="Center">Port:</TextBlock>
+                <TextBox Height="25" Width="200" PlaceholderText="Enter your port number" Text="{Binding PortNumber, Mode=TwoWay}"/>
+                <Button Margin="22,0,0,0" Content="Connect" Click="Connect_Click" Background="Purple"/>
+                
+            </StackPanel>
+        </StackPanel>
+    </Border>
+    
+
+</Window>

@@ -1,0 +1,38 @@
+﻿
+using client_core.logic;
+using client_core.middleware;
+using format.core;
+using Microsoft.Extensions.Logging;
+using network_core.core;
+using router_core.core;
+
+namespace client_core;
+
+public class Program
+{
+    static async Task Main()
+    {
+        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+        ILogger logger = factory.CreateLogger<Program>();
+        Connection? connection;
+        logger.LogInformation("Connecting to server");
+        try
+        {
+            connection = await Connector.Connect("64.181.236.111", 13000, logger, new Middleware(),new RouterMap());
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to connect to server");
+            return;
+        }
+        if (connection == null)
+        {
+            Console.WriteLine("Not connected");
+            return;
+        }
+        Console.WriteLine("Connected!!!");
+        connection.AddTask(new ProtocolMessage(MessageType.RequestUserList));
+        Console.WriteLine("RequestUserList");
+        while (true) continue;
+    }
+}

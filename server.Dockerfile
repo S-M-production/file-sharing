@@ -5,7 +5,7 @@ WORKDIR /src
 #Copys everything into src
 COPY . .
 #Building files and pulling them in a seperate directory other then src
-RUN dotnet publish server-core/server-core.csproj -c Release -o ../app/publish -r linux-x64
+RUN dotnet publish src/main/server-core/server-core.csproj -c Release -o ../../../app/publish -r linux-x64
 
 #Creating a new image
 FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime

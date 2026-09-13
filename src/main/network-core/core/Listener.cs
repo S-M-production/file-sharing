@@ -1,0 +1,92 @@
+using System.Net;
+using System.Net.Sockets;
+using format.core;
+using Microsoft.Extensions.Logging;
+using router_core.core;
+using router_core.middleware;
+
+namespace network_core.core;
+/// <summary>
+/// Class that listens to one single valid connection and initiates request pipeline
+/// </summary>
+public class Listener
+{
+    private readonly TcpClient _tcpClient;
+    private readonly ILogger _logger;
+    private readonly IPAddress _clientAddress;
+    private readonly int _clientPort;
+    private readonly NetworkStream _stream;
+    private readonly Parser _parser;
+    private Connection _connection;
+    private readonly IMiddleware _middleware;
+    public CancellationTokenSource CancellationTokenSource {get; }
+
+    /// <summary>
+    /// Router that belongs to one listening connection
+    /// </summary>
+    public RouterMap RouterMap { get; }
+
+    /// <summary>
+    /// Creates NetworkStream and  saves logger, IP, and port
+    /// </summary>
+    /// <param name="tcpClient">TcpClient of connection to valid server</param>
+    /// <param name="logger">The logger passed down from initial project creation</param>
+    /// <param name="connection">A connection object for writing to client</param>
+    /// <param name="routerMap">Router map the listener will use, needs to be passed in or else it cant be accessed outside</param>
+    /// <param name="middleware">Middleware passed in</param>
+    /// <param name="cancellationTokenSource">Way to cancel the Listener, or stop it</param>
+    /// <exception cref="IOException">When an improper TcpClient is inputted, one that doesn't return IP:PORT</exception>
+    public Listener(TcpClient tcpClient, ILogger logger,Connection connection,RouterMap routerMap,IMiddleware middleware, CancellationTokenSource cancellationTokenSource)
+    {
+        _tcpClient = tcpClient;
+        this._logger = logger;
+        this._connection = connection;
+        _middleware = middleware;
+        this.CancellationTokenSource = cancellationTokenSource;
+        IPEndPoint? clientInfo = tcpClient.Client.RemoteEndPoint as IPEndPoint;
+        if (clientInfo == null) throw new IOException("Improper Connection???");
+        
+        _clientAddress = clientInfo.Address.MapToIPv4();
+        _clientPort = clientInfo.Port;
+
+        _stream = tcpClient.GetStream();
+        _parser = new Parser(_stream);
+        RouterMap = routerMap;
+    }
+    /// <summary>
+    /// Runs a listening loop 
+    /// </summary>
+    /// <remarks>
+    /// Async loop that waits for a request from server
+    /// Parses it
+    /// If issue happens while parsing then its disconnected
+    /// Message is passed through middle ware, and response is created and sent to connection
+    /// </remarks>
+    public async Task Run()
+    {
+        while (!CancellationTokenSource.IsCancellationRequested)
+        {
+            ProtocolMessage message;
+            try
+            {
+                message = await _parser.Parse();
+            }
+            catch (IOException e)
+            {
+                _logger.LogTrace("Issue handling... Disconnecting {Address}:{Port} \n{Error}",_clientAddress,_clientPort,e.StackTrace);
+                _stream?.Close();
+                _tcpClient?.Close();
+                return;
+            }
+        
+            _logger.LogInformation("Got message: {1} \nFrom: {2}:{3}",ProtocolSerializer.ReadableSerialize(message),_clientAddress,_clientPort);
+        
+            //TODO: Create routing layer and create middleware
+            ProtocolMessage? response = await _middleware.GetResponse(message,RouterMap);
+            if (response == null)  continue;
+            _logger.LogInformation("Sent message: {0}",ProtocolSerializer.ReadableSerialize(response));
+            _connection.AddTask(response);
+        }
+        
+    }
+}
