@@ -1,6 +1,3 @@
-Getting Started
-=
-
 Short Introduction:
 -
 
