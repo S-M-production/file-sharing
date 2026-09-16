@@ -6,6 +6,9 @@ namespace router_core.core;
 /// </summary>
 public class HandleWrap
 {
+    /// <summary>
+    /// The message handle that this whole class is wrapping
+    /// </summary>
     public MessageHandler MessageHandler { get; }
     /// <summary>
     /// -1 means unlimited.
@@ -23,29 +26,6 @@ public class HandleWrap
     /// </summary>
     public bool IsExpired =>
         Cap != -1 && Used >= Cap;
-
-    /// <summary>
-    /// Way to call back the handle with checks if you can use it or not
-    /// </summary>
-    /// <param name="handle">Handle that is given</param>
-    /// <returns>Returns true if handle can be used, false if it cant be</returns>
-    public bool TryUse(out MessageHandler? handle)
-    {
-        if (Cap == -1)
-        {
-            handle = MessageHandler;
-            return true;
-        }
-
-        if (Interlocked.Increment(ref _used) <= Cap)
-        {
-            handle = MessageHandler;
-            return true;
-        }
-
-        handle = null;
-        return false;
-    }
     
     /// <summary>
     /// Storing a handle with unlimited uses
@@ -80,5 +60,28 @@ public class HandleWrap
         MessageHandler = messageHandler;
         Cap = cap;
         _used = used;
+    }
+    
+    /// <summary>
+    /// Way to call back the handle with checks if you can use it or not
+    /// </summary>
+    /// <param name="handle">Handle that is given</param>
+    /// <returns>Returns true if handle can be used, false if it cant be</returns>
+    public bool TryUse(out MessageHandler? handle)
+    {
+        if (Cap == -1)
+        {
+            handle = MessageHandler;
+            return true;
+        }
+
+        if (Interlocked.Increment(ref _used) <= Cap)
+        {
+            handle = MessageHandler;
+            return true;
+        }
+
+        handle = null;
+        return false;
     }
 }

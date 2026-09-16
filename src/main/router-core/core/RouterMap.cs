@@ -8,6 +8,9 @@ namespace router_core.core;
 /// </summary>
 public class RouterMap
 {
+    /// <summary>
+    /// Concurrent dictionary mapping message types to their corresponding message handlers.
+    /// </summary>
     private readonly ConcurrentDictionary<MessageType,HandleWrap> _map = new ConcurrentDictionary<MessageType, HandleWrap>();
 
     /// <summary>
@@ -36,6 +39,7 @@ public class RouterMap
     /// <param name="type">Type of message</param>
     /// <param name="existing">Takes HandleWrap that should be replaced</param>
     /// <param name="overwrite">If the exception should be written over without acknowledging expiration</param>
+    /// <returns>True if the route can be replaced, false otherwise.</returns>
     /// <exception cref="Exception">Throws the exception if there is remaining uses left</exception>
     private bool ValidateReplacement(MessageType type, HandleWrap existing, bool overwrite)
     {
@@ -49,12 +53,12 @@ public class RouterMap
     }
 
     /// <summary>
-    /// retrieves a route
+    /// Retrieves a route handler for the specified message type, decrementing its usage count.
     /// </summary>
     /// <param name="type">Type the route is assigned to</param>
-    /// <param name="handle">the handle that is returned</param>
-    /// <returns>where the operation could or couldn't happen</returns>
-    /// <exception cref="Exception"></exception>
+    /// <param name="handle">The message handler that is returned if found and available</param>
+    /// <returns>True if the route was found and successfully retrieved, false if not found or expired.</returns>
+    /// <exception cref="Exception">Thrown if the route handler cannot be used due to capacity limits.</exception>
     public bool GetRoute(MessageType type, out MessageHandler? handle)
     {
         if (!_map.TryGetValue(type, out HandleWrap? wrap))

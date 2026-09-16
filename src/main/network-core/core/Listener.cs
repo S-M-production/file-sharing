@@ -11,14 +11,41 @@ namespace network_core.core;
 /// </summary>
 public class Listener
 {
+    /// <summary>
+    /// The TCP client connection to the remote server.
+    /// </summary>
     private readonly TcpClient _tcpClient;
+    /// <summary>
+    /// Logger instance for recording listener events and errors.
+    /// </summary>
     private readonly ILogger _logger;
+    /// <summary>
+    /// The IPv4 address of the connected client.
+    /// </summary>
     private readonly IPAddress _clientAddress;
+    /// <summary>
+    /// The port number of the connected client.
+    /// </summary>
     private readonly int _clientPort;
+    /// <summary>
+    /// Network stream for reading incoming messages from the client.
+    /// </summary>
     private readonly NetworkStream _stream;
+    /// <summary>
+    /// Parser instance for deserializing incoming protocol messages from the network stream.
+    /// </summary>
     private readonly Parser _parser;
+    /// <summary>
+    /// Connection instance for sending responses back to the client.
+    /// </summary>
     private Connection _connection;
+    /// <summary>
+    /// Middleware pipeline for processing incoming messages and generating responses.
+    /// </summary>
     private readonly IMiddleware _middleware;
+    /// <summary>
+    /// Cancellation token source for signaling graceful shutdown of the listener.
+    /// </summary>
     public CancellationTokenSource CancellationTokenSource {get; }
 
     /// <summary>
