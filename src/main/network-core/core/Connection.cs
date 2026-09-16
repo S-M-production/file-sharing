@@ -8,6 +8,7 @@ using router_core.middleware;
 using network_core.call_back;
 
 namespace network_core.core;
+//TODO: Extract Writing out of this and create a Writer class
 /// <summary>
 /// Class that houses the reader and writer for a connection
 /// </summary>
@@ -17,26 +18,74 @@ namespace network_core.core;
 /// </remarks>
 public class Connection
 {
+    /// <summary>
+    /// Network stream for reading and writing data over the TCP connection.
+    /// </summary>
     private readonly NetworkStream _networkStream;
     /// <summary>
-    /// Thread safe Queue for connection to write a message at a time to client
+    /// Thread-safe unbounded queue for serializing and sending messages in order to the client.
     /// </summary>
     private readonly Channel<CallBackTask> _taskQueue = Channel.CreateUnbounded<CallBackTask>();
+    /// <summary>
+    /// High-priority unbounded queue that bypasses normal message queue ordering for urgent messages.
+    /// </summary>
     private readonly Channel<CallBackTask> _priorityTaskQueue = Channel.CreateUnbounded<CallBackTask>();
-    private Task _asyncLoopTask = null!;
+    /// <summary>
+    /// Task reference for the async write loop that continuously sends queued messages.
+    /// </summary>
+    private Task _asyncWriteLoopTask = null!;
+    /// <summary>
+    /// Listener instance responsible for reading and processing incoming messages from the client.
+    /// </summary>
     private readonly Listener _listener;
+    /// <summary>
+    /// Task reference for the listener's async read loop.
+    /// </summary>
     private Task _listenerTask = null!;
+    /// <summary>
+    /// The underlying TCP client connection to the remote peer.
+    /// </summary>
     private readonly TcpClient _client;
+    /// <summary>
+    /// Logger instance for recording connection events, errors, and diagnostics.
+    /// </summary>
     private readonly ILogger _logger;
+    /// <summary>
+    /// The IPv4 address of the connected client.
+    /// </summary>
     public readonly IPAddress ClientAddress;
+    /// <summary>
+    /// The port number of the connected client.
+    /// </summary>
     public readonly int ClientPort;
+    /// <summary>
+    /// Middleware pipeline for processing incoming and outgoing messages.
+    /// </summary>
     public IMiddleware Middleware { get; }
+    /// <summary>
+    /// Router map defining how messages are routed to handlers based on message type.
+    /// </summary>
     public RouterMap RouterMap { get; } 
-    private bool _started = false;
-    private bool _ended = false;
+    /// <summary>
+    /// Flag indicating whether the connection's read/write loops have been started.
+    /// </summary>
+    private bool _isReadWriteStarted = false;
+    /// <summary>
+    /// Flag indicating whether the connection shutdown process has been initiated.
+    /// </summary>
+    private bool _isReadWriteEnded = false;
+    /// <summary>
+    /// Completion source that signals when the async write loop has finished processing all queued messages.
+    /// </summary>
     private readonly TaskCompletionSource _isWriterCompleted = new TaskCompletionSource();
+    /// <summary>
+    /// Cancellation token source for signaling graceful shutdown to all async operations.
+    /// </summary>
     private CancellationTokenSource CancellationTokenSource { get; } = new();
-    private int _awaitTime = 1; ///How long the writeAsync can wait upto
+    /// <summary>
+    /// Maximum timeout in seconds for individual write operations before raising a TimeoutException.
+    /// </summary>
+    private int _awaitTime = 1;
     /// <summary>
     /// Sets up listening and writing loop for the connection
     /// </summary>
@@ -60,11 +109,12 @@ public class Connection
     /// <summary>
     /// Starts up async write and read loops
     /// </summary>
+    /// <returns>True if the connection was successfully started, false if already started</returns>
     public bool Start()
     {
-        if (_started) return false;
-        _started = true;
-        _asyncLoopTask = StartAsyncWriteLoop();
+        if (_isReadWriteStarted) return false;
+        _isReadWriteStarted = true;
+        _asyncWriteLoopTask = StartAsyncWriteLoop();
         _listenerTask = _listener.Run();
         return true;
     }
@@ -72,16 +122,17 @@ public class Connection
     /// <summary>
     /// Gracefully stops the connection
     /// </summary>
+    /// <returns>True if the connection was successfully stopped, false if already stopped.</returns>
     public async Task<bool> GracefulStop()
     {
-        if (_ended) return false;
+        if (_isReadWriteEnded) return false;
         _logger.LogInformation($"Gracefully stopping connection to {ClientAddress}:{ClientPort}");
-        _ended = true;
+        _isReadWriteEnded = true;
         await CancellationTokenSource.CancelAsync();
         _ = AddTask(new ProtocolMessage(MessageType.Disconnect));
         CompleteQueue();
         await _listenerTask;
-        await _asyncLoopTask;
+        await _asyncWriteLoopTask;
         _client.Close();
         return true;
     }
@@ -90,6 +141,8 @@ public class Connection
     /// Puts message into a ordered queue that will serialize messages one at a time 
     /// </summary>
     /// <param name="protocolMessage">Message that needs to be sent</param>
+    /// <param name="priority">If true, message is queued in priority queue instead of normal queue.</param>
+    /// <returns>TaskCompletionSource that completes when the message has been written.</returns>
     public TaskCompletionSource<bool> AddTask(ProtocolMessage protocolMessage, bool priority = false)
     {
         TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
@@ -103,12 +156,16 @@ public class Connection
     /// <summary>
     /// Way to end the queue
     /// </summary>
+    /// <returns>True if the task queue was successfully completed.</returns>
     public bool CompleteQueue()
     {
         _priorityTaskQueue.Writer.TryComplete();
         return _taskQueue.Writer.TryComplete();
     }
 
+    /// <summary>
+    /// Waits for the async write loop to complete all pending operations.
+    /// </summary>
     public async Task CompleteCallBack()
     {
         await _isWriterCompleted.Task;
@@ -118,6 +175,7 @@ public class Connection
     /// <summary>
     /// Starting up async writing loop, this loop will take a message at a time out of the queue and serialize it. Should only be ran once
     /// </summary>
+    /// <returns>A task that completes when the write loop finishes processing all queued messages.</returns>
     async Task StartAsyncWriteLoop()
     {
         CallBackTask? call;
@@ -145,6 +203,10 @@ public class Connection
         _isWriterCompleted.TrySetResult();
     }
 
+    /// <summary>
+    /// Attempts to read the next task from either priority or normal queue, waiting if neither has data.
+    /// </summary>
+    /// <returns>The next CallBackTask from priority queue if available, otherwise from normal queue, or null if both queues are completed.</returns>
     private async Task<CallBackTask?> TryReadNextTask()
     {
         while (true)

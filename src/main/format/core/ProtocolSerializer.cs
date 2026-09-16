@@ -7,10 +7,10 @@ public static class ProtocolSerializer
     private const string Sig = "CNSR";
     public static byte[] Serialize(MessageType type, string message)
     {
-        return  BuildMessage(type,System.Text.Encoding.UTF8.GetBytes(message)); 
+        return BuildMessage(type,System.Text.Encoding.UTF8.GetBytes(message)); 
     }
     
-    public static byte[]Serialize(MessageType type, byte[] message)
+    public static byte[] Serialize(MessageType type, byte[] message)
     {
         return BuildMessage(type,message); 
     }

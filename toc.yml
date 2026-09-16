@@ -6,6 +6,9 @@
 
 - name: Architecture Overview
   href: architecture-overview.md
+  
+- name: Documentation Table of Contents
+  href: docs-toc.md
 
 - name: Readme
   href: README.md
