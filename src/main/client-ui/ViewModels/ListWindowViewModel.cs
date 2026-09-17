@@ -15,7 +15,7 @@ public class ListWindowViewModel : ReactiveObject
 {   
     private readonly Connection? _activeConnection;
     public UserRequestCallBack _userRequest;
-    private readonly listWindow.ListWindow _window;
+    private readonly ListWindow.ListWindow _window;
     public ReactiveCommand<Unit, Unit> RequestLeave { get; }
     public ObservableCollection<Row> RemotePeers { get; } = new();
 
@@ -34,7 +34,7 @@ public class ListWindowViewModel : ReactiveObject
         private set => this.RaiseAndSetIfChanged(ref _incomingRequestSender, value);
     }
 
-    public ListWindowViewModel(Connection? activeConnection, listWindow.ListWindow window, UserRequestCallBack userRequest)
+    public ListWindowViewModel(Connection? activeConnection, ListWindow.ListWindow window, UserRequestCallBack userRequest)
     {
         _activeConnection = activeConnection;
         _window = window;

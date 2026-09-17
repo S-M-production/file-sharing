@@ -10,7 +10,7 @@ using client_ui.ViewModels;
 using format.core;
 using router_core.core;
 
-namespace client_ui.mainWindow;
+namespace client_ui.MainWindow;
 
 public partial class MainWindow : Window
 {
@@ -57,7 +57,7 @@ public partial class MainWindow : Window
             
             var textList = JsonSerializer.Deserialize<String[]>(text);
 
-            var listWindow = new listWindow.ListWindow
+            var listWindow = new ListWindow.ListWindow
             {
                 WindowStartupLocation = WindowStartupLocation.Manual,
                 Position = this.Position

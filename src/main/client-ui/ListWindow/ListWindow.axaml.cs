@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 
-namespace client_ui.listWindow;
+namespace client_ui.ListWindow;
 
 public partial class ListWindow : Window
 {
