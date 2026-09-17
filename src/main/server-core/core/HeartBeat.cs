@@ -4,39 +4,45 @@ using network_core.core;
 
 namespace server_core.core;
 
-/// <summary>
-/// Manages the heartbeat of a connection, the keep alive logic
-/// </summary>
+/// <summary>Manages the heartbeat (keep-alive) logic for a connection.</summary>
 public class HeartBeat
 {
+    /// <summary>Interval between heartbeat pings in seconds.</summary>
     private const double HeartBeatInterval = 1; //Seconds
+
+    /// <summary>Underlying connection used to send/receive heartbeat messages.</summary>
     private readonly Connection _connection;
+
+    /// <summary>Logger for recording heartbeat events.</summary>
     private readonly ILogger _logger;
+
+    /// <summary>TaskCompletionSource that is completed to signal cancellation/detected disconnect.</summary>
     private readonly TaskCompletionSource _cancellationToken;
+
+    /// <summary>TaskCompletionSource that completes when a Pong is received.</summary>
     private TaskCompletionSource _pongCallBack = null!;
+
+    /// <summary>Number of consecutive failed send attempts.</summary>
     private int _failedSend = 0;
+
+    /// <summary>Maximum allowed failed send attempts before signaling cancellation.</summary>
     private int _failedSendCap = 3;
 
-    /// <summary>
-    /// Task for the loop in case if its ever needed
-    /// </summary>
+    /// <summary>Task representing the running heartbeat loop (if started).</summary>
     public Task HeartBeatLoopTask{get; private set;} = null!;
 
-    /// <summary>
-    /// Sets up heartbeat loop
-    /// </summary>
-    /// <param name="connection">Connection object representing a connection to valid server</param>
-    /// <param name="logger">Logger created at start of program</param>
-    /// <param name="cancellationToken">If the heartbeat detects client wrongfully disconnects, this will be set</param>
+    /// <summary>Creates a new <see cref="HeartBeat"/> for the given connection.</summary>
+    /// <param name="connection">Connection to monitor.</param>
+    /// <param name="logger">Logger to record events.</param>
+    /// <param name="cancellationToken">TaskCompletionSource that will be set when a fatal disconnect is detected.</param>
     public HeartBeat(Connection connection,ILogger logger, TaskCompletionSource cancellationToken)
     {
         this._connection = connection;
         _logger = logger;
         _cancellationToken = cancellationToken;
     }
-    /// <summary>
-    /// Sends a heartbeat Ping message every few HeartBeatInterval seconds
-    /// </summary>
+    /// <summary>Starts the heartbeat loop which periodically sends Ping messages and waits for Pong responses.</summary>
+    /// <returns>None. The loop runs on a background task assigned to <see cref="HeartBeatLoopTask"/>.</returns>
     public void StartHeartBeatLoop()
     {
         HeartBeatLoopTask = Task.Run(async () =>

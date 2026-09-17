@@ -9,32 +9,62 @@ using server_core.middleware;
 namespace server_core.core;
 
 /// <summary>
-/// Class that owns a single connection
+/// Manages a single client connection, handling message routing, heartbeat, and lifecycle.
 /// </summary>
 public class Worker
 {
     /// <summary>
-    /// Be able to distinguish workers using this
+    /// IPv4 address of the connected client for identification
     /// </summary>
     public IPAddress ClientAddress {get; private set;}
     /// <summary>
-    /// Be able to distinguish workers using this
+    /// Port number of the connected client for identification
     /// </summary>
     public int _clientPort {get; private set;}
     /// <summary>
-    /// Connection object created at creation of worker, houses logic for communication
+    /// Connection handler managing read/write operations for this client
     /// </summary>
     public readonly Connection Connection;
+    /// <summary>
+    /// Middleware processing pipeline for incoming messages from this client
+    /// </summary>
     private readonly Middleware _middleware;
+    /// <summary>
+    /// TCP client socket for communication with the connected client
+    /// </summary>
     private TcpClient _tcpClient;
+    /// <summary>
+    /// Logger instance for recording worker events and errors
+    /// </summary>
     private ILogger _logger;
+    /// <summary>
+    /// Task reference for the disposal cleanup loop
+    /// </summary>
     private Task disposeAwaitLoopTask;
+    /// <summary>
+    /// Concurrent dictionary of all connected users across all workers
+    /// </summary>
     private readonly UserList _connections;
+    /// <summary>
+    /// Router map for dispatching messages to registered handlers
+    /// </summary>
     private readonly RouterMap _router = new();
+    /// <summary>
+    /// Heartbeat manager for keeping the connection alive and detecting disconnects
+    /// </summary>
     private readonly HeartBeat _heartBeat;
+    /// <summary>
+    /// Task reference for the heartbeat loop
+    /// </summary>
     private Task _heartBeatLoop = null!;
+    /// <summary>
+    /// Completion source signaling when worker should begin graceful shutdown
+    /// </summary>
     private readonly TaskCompletionSource _cancellationToken = new();
-    /// <summary>Constructor</summary>
+    
+    /// <summary>
+    /// Initializes a Worker with a TCP client and sets up message routing and heartbeat.
+    /// </summary>
     /// <param name="tcpClient">Connection to client</param>
     /// <param name="logger">Logger created at the start of program</param>
     /// <param name="connections">List of all connections</param>
@@ -54,9 +84,7 @@ public class Worker
      
 
     /// <summary>
-    /// Registers users connection
-    /// Then actively listens and forwards responses to middleware
-    /// Then responds with what middleware responded with
+    /// Registers user connection, starts heartbeat and connection loops.
     /// </summary>
     public void Run()
     {
@@ -68,6 +96,10 @@ public class Worker
         disposeAwaitLoopTask = DisposeAwaitLoop();
     }
 
+    /// <summary>
+    /// Awaits cancellation signal then gracefully shuts down the connection.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
     private async Task DisposeAwaitLoop()
     {
         await _cancellationToken.Task;
@@ -78,7 +110,7 @@ public class Worker
     }
     
     /// <summary>
-    /// Removes the registered user from the connections list
+    /// Removes the registered user from the connections list by endpoint key.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     private void RemoveRegisteredUser()
@@ -87,7 +119,7 @@ public class Worker
     }
     
     /// <summary>
-    /// Registers the users connection in the concurrent hashset
+    /// Registers the client connection in the concurrent user list for discovery.
     /// </summary>
     private void RegisterUserConnection()
     {

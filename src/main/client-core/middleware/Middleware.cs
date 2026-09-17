@@ -22,6 +22,7 @@ public class Middleware:IMiddleware
     {
         if (message.MessageType == MessageType.Ping)
         {
+            // Respond to server heartbeat to keep connection alive
             return new ProtocolMessage(MessageType.Pong);
         }
         //TODO: Fill out middleware if statement logic

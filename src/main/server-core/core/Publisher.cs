@@ -4,23 +4,28 @@ using Microsoft.Extensions.Logging;
 
 namespace server_core.core;
 
-/// <summary>
-/// pub class for pub-sub
-/// </summary>
-/// <param name="logger">Logger ig</param>
+/// <summary>Publisher for broadcasting <see cref="ProtocolMessage"/> instances to connected workers.</summary>
+/// <param name="logger">Logger instance used for internal logging.</param>
 public class Publisher(ILogger logger)
 {
+    /// <summary>Set of connected workers subscribed to receive messages.</summary>
     private readonly HashSet<Worker> _workers = new();
+
+    /// <summary>Unbounded channel used as the queue for outgoing <see cref="ProtocolMessage"/> items.</summary>
     private readonly Channel<ProtocolMessage> _taskQueue = Channel.CreateUnbounded<ProtocolMessage>();
+
+    /// <summary>Lock object used to synchronize access to shared resources.</summary>
     private readonly Lock _lock = new();
+
+    /// <summary>Background task running the write loop that dispatches messages.</summary>
     private Task _writeLoop;
+
+    /// <summary>Indicates whether the publisher has started its write loop.</summary>
     private bool IsStarted = false;
     
-    /// <summary>
-    /// Adding a worker to the set of workers
-    /// </summary>
-    /// <param name="worker">The worker that was created</param>
-    /// <returns>T/F if the worker could or couldn't be added</returns>
+    /// <summary>Adds a worker to the publisher's subscriber set.</summary>
+    /// <param name="worker">Worker to add.</param>
+    /// <returns>True if the worker was added; false if it was already present.</returns>
     public bool AddWorker(Worker worker)
     {
         lock (_lock)
@@ -30,20 +35,16 @@ public class Publisher(ILogger logger)
         }
     }
     
-    /// <summary>
-    /// Adding a message the queue
-    /// </summary>
-    /// <param name="message">Message to be broadcasted</param>
-    /// <returns>T/F if it could be added</returns>
-    /// TODO: Make extra logic so i can broadcast to select people or all
+    /// <summary>Enqueues a message for broadcast to subscribers.</summary>
+    /// <param name="message">ProtocolMessage to enqueue.</param>
+    /// <returns>True if the message was written to the queue; otherwise false.</returns>
+    // TODO: Make extra logic so i can broadcast to select people or all
     public bool AddMessage(ProtocolMessage message)
     {
         logger.LogInformation("Added message to pub queue: {0}",ProtocolSerializer.ReadableSerialize(message));
         return _taskQueue.Writer.TryWrite(message);
     }
-    /// <summary>
-    /// Start up AsyncWriteLoop when needed, IDK why I added
-    /// </summary>
+    /// <summary>Starts the background write loop if not already running.</summary>
     public void Start()
     {
         if (!IsStarted)
@@ -51,9 +52,8 @@ public class Publisher(ILogger logger)
              _writeLoop = StartAsyncWriteLoop();
         }
     }
-    /// <summary>
-    /// Loop that goes through each packet and broadcasts it to all people
-    /// </summary>
+    /// <summary>Asynchronously reads messages from the queue and broadcasts them to workers.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous loop.</returns>
     private async Task StartAsyncWriteLoop()
     {
         await foreach (ProtocolMessage packet in _taskQueue.Reader.ReadAllAsync())

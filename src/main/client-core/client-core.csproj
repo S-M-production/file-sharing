@@ -20,7 +20,6 @@
   </ItemGroup>
   
   <PropertyGroup>
-    <StartupObject>client_core.Program</StartupObject>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 

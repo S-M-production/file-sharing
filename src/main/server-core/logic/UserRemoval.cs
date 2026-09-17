@@ -4,24 +4,30 @@ using System.Text;
 namespace server_core.logic;
 
 /// <summary>
-/// used to remove a user
+/// Handles removal of disconnected users from the user list.
 /// </summary>
 public class UserRemoval
 {
-    private readonly UserList _userlist;
     /// <summary>
-    /// constructor
+    /// Reference to the concurrent user list for removing entries
     /// </summary>
-    /// <param name="userList">stored value of user list</param>
+    private readonly UserList _userlist;
+    
+    /// <summary>
+    /// Initializes UserRemoval with a reference to the user list.
+    /// </summary>
+    /// <param name="userList">The UserList instance to remove users from</param>
     public UserRemoval(UserList userList)
     {
         _userlist = userList;
     }
+    
     /// <summary>
-    /// reterives the message and uses the connected body to delete instance out of dictonary
+    /// Extracts user endpoint from message body and removes them from the user list.
+    /// Conforms to MessageHandler delegate signature for use in RouterMap.
     /// </summary>
-    /// <param name="protocolMessage">taking the message put in</param>
-    /// <returns></returns>
+    /// <param name="protocolMessage">The disconnect message containing the user endpoint in its body</param>
+    /// <returns>Always returns null as removal is a side-effect with no response</returns>
     public ProtocolMessage? Remove(ProtocolMessage protocolMessage)
     {
         var temptext = Encoding.UTF8.GetString(protocolMessage.Body);

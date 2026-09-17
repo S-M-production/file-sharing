@@ -7,12 +7,19 @@ using server_core.middleware;
 
 namespace server_core.core;
 /// <summary>
-/// Listens for connections and spawns workers for each connection
+/// Listens for incoming TCP connections and spawns worker threads to handle each client.
 /// </summary>
 public class Listener(IPAddress address, int port, ILogger logger)
 {
+    /// <summary>
+    /// TCP listener bound to the specified address and port
+    /// </summary>
     private readonly TcpListener _tcpListener = new(address, port);
+    /// <summary>
+    /// Publisher for broadcasting user list updates to all connected clients
+    /// </summary>
     private readonly Publisher _publisher = new(logger);
+    
     /// <summary>
     /// Starts listening and spawns a worker per client connection
     /// </summary>
