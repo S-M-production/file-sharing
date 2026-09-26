@@ -3,7 +3,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-class Client
+namespace network_core;
+
+public static class Client
 {
     private const string DefaultServerAddress = "150.230.32.189";
     private const int DefaultServerPort = 5000;

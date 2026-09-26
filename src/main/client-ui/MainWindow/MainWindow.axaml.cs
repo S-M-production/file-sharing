@@ -12,14 +12,25 @@ using router_core.core;
 
 namespace client_ui.MainWindow;
 
+/// <summary>
+/// Represents the initial client window used to establish a connection to the server and open the peer list.
+/// </summary>
 public partial class MainWindow : Window
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MainWindow"/> window.
+    /// </summary>
     public MainWindow()
     {
         InitializeComponent();
         DataContext = new MainWindowViewModel();
     }
 
+    /// <summary>
+    /// Attempts to connect to the configured server and opens the list window when the user list is received.
+    /// </summary>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="e">The routed event arguments.</param>
     private async void Connect_Click(object? sender, RoutedEventArgs e)
     {
         try
@@ -54,7 +65,7 @@ public partial class MainWindow : Window
             var awaitingList = await callBack._awaitingMessage.Task;
 
             var text = Encoding.UTF8.GetString(awaitingList.Body);
-            
+
             var textList = JsonSerializer.Deserialize<String[]>(text);
 
             var listWindow = new ListWindow.ListWindow
@@ -74,7 +85,7 @@ public partial class MainWindow : Window
                 var temp2 = temp.Split(":");
                 Dispatcher.UIThread.Post(() =>
                 {
-                listWindowViewModel.AddEntry(temp2[0],int.Parse(temp2[1]));
+                    listWindowViewModel.AddEntry(temp2[0], int.Parse(temp2[1]));
                 });
                 return null;
             };
@@ -86,7 +97,7 @@ public partial class MainWindow : Window
                 {
                     listWindowViewModel.RemoveEntry(temp2[0], int.Parse(temp2[1]));
                 });
-                
+
                 return null;
             };
             viewModel.ActiveConnection!.RouterMap.AddRoute(MessageType.AddUserToList, AddElement);
@@ -98,11 +109,21 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>
+    /// Starts dragging the window when the user presses the title bar.
+    /// </summary>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="e">The pointer event data.</param>
     private void OnDragWindow(object? sender, PointerPressedEventArgs e)
     {
         BeginMoveDrag(e);
     }
 
+    /// <summary>
+    /// Closes the connection window when the close button is clicked.
+    /// </summary>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="e">The routed event arguments.</param>
     private void OnCloseClicked(object? sender, RoutedEventArgs e)
     {
         Close();
