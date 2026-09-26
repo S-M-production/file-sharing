@@ -1,11 +1,15 @@
 using System;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 class Client
 {
-    private const string DefaultServerAddress = "150.230.32.189";
+    // Use localhost by default for easier local testing. Change if you run server elsewhere.
+    private const string DefaultServerAddress = "127.0.0.1";
     private const int DefaultServerPort = 5000;
 
     public static async Task WriteAsync(string roleText, string uuid, int localPort, string message, CancellationToken cancellationToken)
@@ -16,21 +20,11 @@ class Client
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(uuid))
+        if (string.IsNullOrWhiteSpace(uuid) || !Guid.TryParse(uuid, out _))
         {
-            Console.WriteLine("UUID is required.");
+            Console.WriteLine("UUID is required and must be a valid GUID.");
             return;
         }
-
-        if (!Guid.TryParse(uuid, out _))
-        {
-            Console.WriteLine("UUID must be a valid GUID string.");
-            return;
-        }
-
-        string payload = BuildAnnouncement(role, uuid, message);
-        byte[] announceBytes = Encoding.UTF8.GetBytes(payload);
-        byte[] peerBytes = Encoding.UTF8.GetBytes(message);
 
         if (localPort is < IPEndPoint.MinPort or > IPEndPoint.MaxPort)
         {
@@ -40,119 +34,141 @@ class Client
 
         var serverEndpoint = new IPEndPoint(IPAddress.Parse(DefaultServerAddress), DefaultServerPort);
 
-        UdpClient udpClient;
-
+        // 1) Register with server using a TCP connection bound to the localPort so the server sees the correct source port
+        IPEndPoint? peerEndpoint = null;
         try
         {
-            udpClient = new UdpClient(localPort);
+            using (var regSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                regSocket.Bind(new IPEndPoint(IPAddress.Any, localPort));
+                await regSocket.ConnectAsync(serverEndpoint);
+                using var ns = new NetworkStream(regSocket, ownsSocket: false);
+
+                string registration = $"{role}|{uuid}|{localPort}|{message}\n";
+                var bytes = Encoding.UTF8.GetBytes(registration);
+                await ns.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
+                await ns.FlushAsync(cancellationToken);
+
+                // Wait for server to respond with PEER|ip:port\n (or until cancelled)
+                var readBuf = new byte[1024];
+                int read = await ns.ReadAsync(readBuf, 0, readBuf.Length, cancellationToken);
+                if (read > 0)
+                {
+                    string resp = Encoding.UTF8.GetString(readBuf, 0, read).Trim();
+                    if (TryParsePeerEndpoint(resp, out var parsed))
+                    {
+                        peerEndpoint = parsed;
+                    }
+                }
+            }
         }
-        catch (SocketException)
+        catch (Exception ex)
         {
-            Console.WriteLine($"Failed to bind client to local port {localPort}. Is it already in use?");
+            Console.WriteLine($"Registration failed: {ex.Message}");
             return;
         }
 
-        using (udpClient)
+        if (peerEndpoint == null)
         {
-            udpClient.Connect(serverEndpoint);
+            Console.WriteLine("No peer endpoint received from server.");
+            return;
+        }
 
-            var peerEndpointSource = new TaskCompletionSource<IPEndPoint>(TaskCreationOptions.RunContinuationsAsynchronously);
+        Console.WriteLine($"Peer discovered for {role}/{uuid}: {peerEndpoint}");
 
-            var announceTask = AnnounceLoopAsync(udpClient, announceBytes, peerEndpointSource.Task, cancellationToken);
-            var receiveTask = ReceiveLoopAsync(udpClient, peerEndpointSource, cancellationToken);
+        // 2) Try to establish direct TCP connection: start a listener and concurrently attempt outgoing connects
+        var listener = new TcpListener(IPAddress.Any, localPort);
+        try
+        {
+            listener.Start();
+        }
+        catch (SocketException ex)
+        {
+            Console.WriteLine($"Failed to start listener on {localPort}: {ex.Message}");
+            return;
+        }
 
-            IPEndPoint peerEndpoint;
-
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var acceptTask = Task.Run(async () =>
+        {
             try
             {
-                peerEndpoint = await peerEndpointSource.Task.WaitAsync(cancellationToken);
+                var accepted = await listener.AcceptTcpClientAsync(cts.Token);
+                return accepted;
             }
-            catch (OperationCanceledException)
+            catch { return null; }
+        }, cts.Token);
+
+        var connectTask = Task.Run(async () =>
+        {
+            while (!cts.IsCancellationRequested)
             {
+                try
+                {
+                    var tc = new TcpClient();
+                    var connectTaskInner = tc.ConnectAsync(peerEndpoint.Address, peerEndpoint.Port);
+                    var completed = await Task.WhenAny(connectTaskInner, Task.Delay(1000, cts.Token));
+                    if (completed == connectTaskInner)
+                    {
+                        if (tc.Connected) return tc;
+                    }
+                    tc.Dispose();
+                }
+                catch { }
+
+                await Task.Delay(100, cts.Token);
+            }
+
+            return null;
+        }, cts.Token);
+
+        // Wait for whichever completes first
+        TcpClient? connection = null;
+        try
+        {
+            var finished = await Task.WhenAny(acceptTask, connectTask);
+            if (finished == acceptTask)
+            {
+                connection = acceptTask.Result;
+            }
+            else
+            {
+                connection = connectTask.Result;
+            }
+
+            if (connection == null)
+            {
+                Console.WriteLine("Failed to establish direct connection to peer.");
                 return;
             }
 
-            udpClient.Connect(peerEndpoint);
-            Console.WriteLine($"Peer discovered for {role}/{uuid}: {peerEndpoint}");
+            cts.Cancel(); // stop the other task
 
-            await announceTask;
+            // Send one message and print it once
+            using var ns = connection.GetStream();
+            var payload = Encoding.UTF8.GetBytes(message + "\n");
+            await ns.WriteAsync(payload, 0, payload.Length, CancellationToken.None);
+            await ns.FlushAsync(CancellationToken.None);
 
-            var peerSendTask = PeerSendLoopAsync(udpClient, peerBytes, cancellationToken);
+            Console.WriteLine($"Connected to peer {connection.Client.RemoteEndPoint}");
 
-            await Task.WhenAll(receiveTask, peerSendTask);
-        }
-    }
-
-    private static async Task AnnounceLoopAsync(UdpClient udpClient, byte[] payload, Task<IPEndPoint> peerTask, CancellationToken cancellationToken)
-    {
-        try
-        {
-            while (!cancellationToken.IsCancellationRequested && !peerTask.IsCompleted)
-            {
-                await udpClient.SendAsync(payload, payload.Length);
-                await Task.Delay(100, cancellationToken);
-            }
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-        }
-    }
-
-    private static async Task ReceiveLoopAsync(UdpClient udpClient, TaskCompletionSource<IPEndPoint> peerEndpointSource, CancellationToken cancellationToken)
-    {
-        bool printedPeerMessage = false;
-
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            UdpReceiveResult result;
-
+            // Read one message from peer and print
+            var rbuf = new byte[1024];
             try
             {
-                result = await udpClient.ReceiveAsync();
+                int r = await ns.ReadAsync(rbuf, 0, rbuf.Length, CancellationToken.None);
+                if (r > 0)
+                {
+                    var recv = Encoding.UTF8.GetString(rbuf, 0, r).Trim();
+                    Console.WriteLine(recv);
+                }
             }
-            catch (ObjectDisposedException) when (cancellationToken.IsCancellationRequested)
-            {
-                break;
-            }
-            catch (SocketException)
-            {
-                continue;
-            }
-
-            string payload = Encoding.UTF8.GetString(result.Buffer);
-
-            if (TryParsePeerEndpoint(payload, out var peerEndpoint))
-            {
-                peerEndpointSource.TrySetResult(peerEndpoint);
-                continue;
-            }
-
-            if (peerEndpointSource.Task.IsCompleted && !printedPeerMessage && !string.IsNullOrWhiteSpace(payload))
-            {
-                Console.WriteLine(payload);
-                printedPeerMessage = true;
-            }
+            catch { }
         }
-    }
-
-    private static async Task PeerSendLoopAsync(UdpClient udpClient, byte[] payload, CancellationToken cancellationToken)
-    {
-        try
+        finally
         {
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                await udpClient.SendAsync(payload, payload.Length);
-                await Task.Delay(100, cancellationToken);
-            }
+            try { listener.Stop(); } catch { }
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-        }
-    }
-
-    private static string BuildAnnouncement(string role, string uuid, string message)
-    {
-        return $"{role.ToUpperInvariant()}{uuid}{message}";
     }
 
     private static bool TryParseRole(string roleText, out string role)
@@ -164,20 +180,14 @@ class Client
     private static bool TryParsePeerEndpoint(string payload, out IPEndPoint peerEndpoint)
     {
         peerEndpoint = default!;
-
-        if (!payload.StartsWith("PEER|", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        string endpointText = payload.Substring("PEER|".Length);
-
-        if (!IPEndPoint.TryParse(endpointText, out var parsedPeerEndpoint))
-        {
-            return false;
-        }
-
-        peerEndpoint = parsedPeerEndpoint;
+        if (!payload.StartsWith("PEER|", StringComparison.OrdinalIgnoreCase)) return false;
+        string endpointText = payload.Substring("PEER|".Length).Trim();
+        // expected ip:port
+        var parts = endpointText.Split(':');
+        if (parts.Length != 2) return false;
+        if (!IPAddress.TryParse(parts[0], out var ip)) return false;
+        if (!int.TryParse(parts[1], out var port)) return false;
+        peerEndpoint = new IPEndPoint(ip, port);
         return true;
     }
 }
