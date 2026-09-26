@@ -9,15 +9,16 @@ using System.Threading.Tasks;
 
 public sealed class Server
 {
-    private const int Port = 13000;
     private readonly TcpListener _listener;
+    private readonly int _port;
     private readonly Dictionary<(string Role, string Uuid), (IPEndPoint PublicEndpoint, TcpClient Connection)> _registrations = new();
 
-    public Server()
+    public Server(int port = 13000)
     {
-        _listener = new TcpListener(IPAddress.Any, Port);
+        _port = port;
+        _listener = new TcpListener(IPAddress.Any, _port);
         _listener.Start();
-        Console.WriteLine($"TCP coordination server listening on port {Port}...");
+        Console.WriteLine($"TCP coordination server listening on port {_port}...");
     }
 
     public async Task ListenAsync(CancellationToken cancellationToken)

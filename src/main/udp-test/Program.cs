@@ -23,14 +23,22 @@ class Program
         {
             case "s":
             {
-                var server = new Server();
+                int serverPort = 13000;
+                if (args.Length >= 2 && !int.TryParse(args[1], out serverPort))
+                {
+                    Console.WriteLine("Server port must be a valid integer.");
+                    return;
+                }
+
+                var server = new Server(serverPort);
                 await server.ListenAsync(cancellationSource.Token);
                 break;
             }
 
             case "c":
             {
-                if (args.Length < 4)
+                // Expected: c <a|b> <uuid> <clientPort> <serverHost> <serverPort> [message]
+                if (args.Length < 6)
                 {
                     PrintUsage();
                     return;
@@ -44,9 +52,17 @@ class Program
                     return;
                 }
 
-                string message = args.Length >= 5 ? args[4] : $"hello-from-{role.ToUpperInvariant()}";
+                string serverHost = args[4];
 
-                await Client.WriteAsync(role, uuid, clientPort, message, cancellationSource.Token);
+                if (!int.TryParse(args[5], out int serverPort))
+                {
+                    Console.WriteLine("Server port must be a valid integer.");
+                    return;
+                }
+
+                string message = args.Length >= 7 ? args[6] : $"hello-from-{role.ToUpperInvariant()}";
+
+                await Client.WriteAsync(role, uuid, clientPort, serverHost, serverPort, message, cancellationSource.Token);
                 break;
             }
 
@@ -59,8 +75,8 @@ class Program
     private static void PrintUsage()
     {
         Console.WriteLine("Usage:");
-        Console.WriteLine("  udp-test s");
-        Console.WriteLine("  udp-test c <a|b> <uuid> <clientPort> [message]");
+        Console.WriteLine("  udp-test s [serverPort]");
+        Console.WriteLine("  udp-test c <a|b> <uuid> <clientPort> <serverHost> <serverPort> [message]");
     }
 }
 

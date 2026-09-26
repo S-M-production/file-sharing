@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 class Client
 {
-    // Use localhost by default for easier local testing. Change if you run server elsewhere.
-    private const string DefaultServerAddress = "150.230.32.189";
+    // Default server values kept for fallback; CLI now allows specifying server host/port.
+    private const string DefaultServerAddress = "127.0.0.1";
     private const int DefaultServerPort = 13000;
 
-    public static async Task WriteAsync(string roleText, string uuid, int localPort, string message, CancellationToken cancellationToken)
+    public static async Task WriteAsync(string roleText, string uuid, int localPort, string serverHost, int serverPort, string message, CancellationToken cancellationToken)
     {
         if (!TryParseRole(roleText, out var role))
         {
@@ -32,7 +32,14 @@ class Client
             return;
         }
 
-        var serverEndpoint = new IPEndPoint(IPAddress.Parse(DefaultServerAddress), DefaultServerPort);
+        var serverAddressText = string.IsNullOrWhiteSpace(serverHost) ? DefaultServerAddress : serverHost;
+        if (!IPAddress.TryParse(serverAddressText, out var serverAddress))
+        {
+            Console.WriteLine("Server host must be a valid IP address.");
+            return;
+        }
+
+        var serverEndpoint = new IPEndPoint(serverAddress, serverPort > 0 ? serverPort : DefaultServerPort);
 
         // 1) Register with server using a TCP connection bound to the localPort so the server sees the correct source port
         IPEndPoint? peerEndpoint = null;
