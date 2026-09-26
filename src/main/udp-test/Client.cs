@@ -6,9 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace network_core;
-
-public static class Client
+class Client
 {
     // Default server values kept for fallback; CLI now allows specifying server host/port.
     private const string DefaultServerAddress = "127.0.0.1";
