@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 class Client
 {
     // Use localhost by default for easier local testing. Change if you run server elsewhere.
-    private const string DefaultServerAddress = "127.0.0.1";
-    private const int DefaultServerPort = 5000;
+    private const string DefaultServerAddress = "150.230.32.189";
+    private const int DefaultServerPort = 13000;
 
     public static async Task WriteAsync(string roleText, string uuid, int localPort, string message, CancellationToken cancellationToken)
     {

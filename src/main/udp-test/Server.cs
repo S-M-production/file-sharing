@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 public sealed class Server
 {
-    private const int Port = 5000;
+    private const int Port = 13000;
     private readonly TcpListener _listener;
     private readonly Dictionary<(string Role, string Uuid), (IPEndPoint PublicEndpoint, TcpClient Connection)> _registrations = new();
 
