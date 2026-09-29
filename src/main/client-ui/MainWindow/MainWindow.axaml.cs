@@ -58,7 +58,7 @@ public partial class MainWindow : Window
                 true);
 
             // Send request
-            connection.AddTask(
+            connection.Writer.AddTask(
                 new ProtocolMessage(MessageType.RequestUserList));
 
             // Wait for response

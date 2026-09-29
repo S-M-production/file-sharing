@@ -98,7 +98,7 @@ public class Writer
     /// Starting up async writing loop, this loop will take a message at a time out of the queue and serialize it. Should only be ran once
     /// </summary>
     /// <returns>A task that completes when the write loop finishes processing all queued messages.</returns>
-    async Task StartAsyncWriteLoop()
+    public async Task StartAsyncWriteLoop()
     {
         CallBackTask? call;
         while ((call = await TryReadNextTask()) != null)

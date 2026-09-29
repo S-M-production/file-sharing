@@ -112,7 +112,7 @@ public class Listener
             ProtocolMessage? response = await _middleware.GetResponse(message,RouterMap);
             if (response == null)  continue;
             _logger.LogInformation("Sent message: {0}",ProtocolSerializer.ReadableSerialize(response));
-            _connection.AddTask(response);
+            _connection.Writer.AddTask(response);
         }
         
     }

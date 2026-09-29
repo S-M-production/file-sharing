@@ -23,18 +23,6 @@ public class Connection
     /// </summary>
     private readonly NetworkStream _networkStream;
     /// <summary>
-    /// Thread-safe unbounded queue for serializing and sending messages in order to the client.
-    /// </summary>
-    private readonly Channel<CallBackTask> _taskQueue = Channel.CreateUnbounded<CallBackTask>();
-    /// <summary>
-    /// High-priority unbounded queue that bypasses normal message queue ordering for urgent messages.
-    /// </summary>
-    private readonly Channel<CallBackTask> _priorityTaskQueue = Channel.CreateUnbounded<CallBackTask>();
-    /// <summary>
-    /// Task reference for the async write loop that continuously sends queued messages.
-    /// </summary>
-    private Task _asyncWriteLoopTask = null!;
-    /// <summary>
     /// Listener instance responsible for reading and processing incoming messages from the client.
     /// </summary>
     private readonly Listener _listener;
@@ -42,6 +30,11 @@ public class Connection
     /// Task reference for the listener's async read loop.
     /// </summary>
     private Task _listenerTask = null!;
+    /// <summary>
+    /// The writer instance for sending messages over the connection.
+    /// </summary>
+    public readonly Writer Writer;
+    private Task _asyncWriteLoopTask = null!;
     /// <summary>
     /// The underlying TCP client connection to the remote peer.
     /// </summary>
@@ -75,10 +68,6 @@ public class Connection
     /// </summary>
     private bool _isReadWriteEnded = false;
     /// <summary>
-    /// Completion source that signals when the async write loop has finished processing all queued messages.
-    /// </summary>
-    private readonly TaskCompletionSource _isWriterCompleted = new TaskCompletionSource();
-    /// <summary>
     /// Cancellation token source for signaling graceful shutdown to all async operations.
     /// </summary>
     private CancellationTokenSource CancellationTokenSource { get; } = new();
@@ -86,6 +75,9 @@ public class Connection
     /// Maximum timeout in seconds for individual write operations before raising a TimeoutException.
     /// </summary>
     private int _awaitTime = 1;
+    
+    
+    
     /// <summary>
     /// Sets up listening and writing loop for the connection
     /// </summary>
@@ -104,6 +96,7 @@ public class Connection
         this.Middleware = middleware;
         _networkStream = client.GetStream();
         _listener = new Listener(client,logger,this,RouterMap,middleware,CancellationTokenSource);
+        Writer = new Writer(logger, client.GetStream(), clientInfo.Address.MapToIPv4(), clientInfo.Port, _awaitTime);
         this._logger = logger;
     }
     /// <summary>
@@ -114,7 +107,7 @@ public class Connection
     {
         if (_isReadWriteStarted) return false;
         _isReadWriteStarted = true;
-        _asyncWriteLoopTask = StartAsyncWriteLoop();
+        _asyncWriteLoopTask = Writer.StartAsyncWriteLoop();
         _listenerTask = _listener.Run();
         return true;
     }
@@ -129,100 +122,11 @@ public class Connection
         _logger.LogInformation($"Gracefully stopping connection to {ClientAddress}:{ClientPort}");
         _isReadWriteEnded = true;
         await CancellationTokenSource.CancelAsync();
-        _ = AddTask(new ProtocolMessage(MessageType.Disconnect));
-        CompleteQueue();
+        _ = Writer.AddTask(new ProtocolMessage(MessageType.Disconnect));
+        Writer.CompleteQueue();
         await _listenerTask;
         await _asyncWriteLoopTask;
         _client.Close();
         return true;
     }
-
-    /// <summary>
-    /// Puts message into a ordered queue that will serialize messages one at a time 
-    /// </summary>
-    /// <param name="protocolMessage">Message that needs to be sent</param>
-    /// <param name="priority">If true, message is queued in priority queue instead of normal queue.</param>
-    /// <returns>TaskCompletionSource that completes when the message has been written.</returns>
-    public TaskCompletionSource<bool> AddTask(ProtocolMessage protocolMessage, bool priority = false)
-    {
-        TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-        var task = new CallBackTask(protocolMessage, tcs);
-        if (priority)
-            _priorityTaskQueue.Writer.TryWrite(task);
-        else
-            _taskQueue.Writer.TryWrite(task);
-        return tcs;
-    }
-    /// <summary>
-    /// Way to end the queue
-    /// </summary>
-    /// <returns>True if the task queue was successfully completed.</returns>
-    public bool CompleteQueue()
-    {
-        _priorityTaskQueue.Writer.TryComplete();
-        return _taskQueue.Writer.TryComplete();
-    }
-
-    /// <summary>
-    /// Waits for the async write loop to complete all pending operations.
-    /// </summary>
-    public async Task CompleteCallBack()
-    {
-        await _isWriterCompleted.Task;
-        
-    }
-    
-    /// <summary>
-    /// Starting up async writing loop, this loop will take a message at a time out of the queue and serialize it. Should only be ran once
-    /// </summary>
-    /// <returns>A task that completes when the write loop finishes processing all queued messages.</returns>
-    async Task StartAsyncWriteLoop()
-    {
-        CallBackTask? call;
-        while ((call = await TryReadNextTask()) != null)
-        {
-            byte[] buffer = ProtocolSerializer.Serialize(call.ProtocolMessage);
-            try
-            {
-                await _networkStream.WriteAsync(buffer, 0, buffer.Length).WaitAsync(TimeSpan.FromSeconds(_awaitTime));
-            }
-            catch (Exception e) when (e is IOException || e is TimeoutException)
-            {
-                _logger.LogError(e.Message);
-                call.SetCompletionSource(false);
-                continue;
-            }catch (Exception e)
-            {
-                _logger.LogError(e.Message);
-                call.SetCompletionSource(false);
-                continue;
-            }
-            _logger.LogInformation("Wrote: {0} to {1}:{2}",ProtocolSerializer.ReadableSerialize(call.ProtocolMessage),ClientAddress,ClientPort);
-            call.SetCompletionSource();
-        }
-        _isWriterCompleted.TrySetResult();
-    }
-
-    /// <summary>
-    /// Attempts to read the next task from either priority or normal queue, waiting if neither has data.
-    /// </summary>
-    /// <returns>The next CallBackTask from priority queue if available, otherwise from normal queue, or null if both queues are completed.</returns>
-    private async Task<CallBackTask?> TryReadNextTask()
-    {
-        while (true)
-        {
-            if (_priorityTaskQueue.Reader.TryRead(out CallBackTask? priorityTask))
-                return priorityTask;
-            if (_taskQueue.Reader.TryRead(out CallBackTask? task))
-                return task;
-
-            if (_priorityTaskQueue.Reader.Completion.IsCompleted && _taskQueue.Reader.Completion.IsCompleted)
-                return null;
-
-            await Task.WhenAny(
-                _priorityTaskQueue.Reader.WaitToReadAsync().AsTask(),
-                _taskQueue.Reader.WaitToReadAsync().AsTask());
-        }
-    }
-    
 }
