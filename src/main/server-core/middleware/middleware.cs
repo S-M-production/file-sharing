@@ -49,7 +49,7 @@ public class Middleware:IMiddleware
                 string user = _ip.Address.MapToIPv4().ToString() +":"+ _ip.Port.ToString();
                 return new ProtocolMessage(MessageType.UserList, _userList.Serialize(user));
             
-            case MessageType.Connect:
+            case MessageType.ConnectToServer:
                 // Acknowledge successful connection to server
                 return new ProtocolMessage(MessageType.ConnectedToServer);
             case MessageType.Ping:
@@ -61,7 +61,7 @@ public class Middleware:IMiddleware
                 if (!_userList.TryGetValue(tempText, out Worker worker)) return new ProtocolMessage(MessageType.UserNotFound);
                 var response = new ProtocolMessage(MessageType.ConnectToUser,
                     Encoding.UTF8.GetBytes($"{_ip.Address.MapToIPv4()}:{_ip.Port}"));
-                worker.Connection.AddTask(response);
+                worker.Connection.Writer.AddTask(response);
                 return null;  // Don't send response to requester, they'll contact directly
             
             case MessageType.Disconnect:

@@ -7,7 +7,11 @@ public enum MessageType : int
     /// <summary>
     /// Request to connect to server, for now contains no body
     /// </summary>
-    Connect,
+    ConnectToServer,
+    /// <summary>
+    /// Request to connect to a specific user, contains the user IP:PORT in body
+    /// </summary>
+    ConnectToUser,
     /// <summary>
     /// request to leave, removing you from list and visiblity
     /// </summary>
@@ -17,11 +21,7 @@ public enum MessageType : int
     /// </summary>
     RequestUserList,
     /// <summary>
-    /// Request to connect to a specific user, contains the user IP:PORT in body
-    /// </summary>
-    ConnectToUser,
-    /// <summary>
-    /// Request to server to keep connection alive
+    /// Request to keep connection alive
     /// </summary>
     Ping,
     // Server → Client
@@ -29,6 +29,10 @@ public enum MessageType : int
     /// Response back to client allowing connection to server, for now contains no body
     /// </summary>
     ConnectedToServer,
+    /// <summary>
+    /// Response back to client allowing connection to user, for now contains no body
+    /// </summary>
+    ConnectedToUser,
     /// <summary>
     /// Response back to client, contains full list of users in its body
     /// </summary>
@@ -41,10 +45,6 @@ public enum MessageType : int
     /// When a user leaves server, server pub this to all users to remove user from list
     /// </summary>
     RemoveUserFromList,
-    /// <summary>
-    /// Asks client for what ports they have free to start UDP hole punch, for now contains no body
-    /// </summary>
-    PortNegotiation,
     /// <summary>
     /// Tells both clients to start UDP hole punching, for now contains no body
     /// </summary>
