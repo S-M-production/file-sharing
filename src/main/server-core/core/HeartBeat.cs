@@ -61,7 +61,7 @@ public class HeartBeat
                     }, 
                     1);
                 
-                var taskCompletionSource = await _connection.AddTask(
+                var taskCompletionSource = await _connection.Writer.AddTask(
                     new ProtocolMessage(MessageType.Ping), priority: true).Task;
                 
                 if (!taskCompletionSource)

@@ -65,7 +65,7 @@ public class Publisher(ILogger logger)
                 {
                     var temp = worker.ClientAddress.MapToIPv4().ToString() + ":" + worker._clientPort;
                     if (System.Text.Encoding.UTF8.GetString(packet.Body) == temp) continue;
-                    worker.Connection.AddTask(packet);
+                    worker.Connection.Writer.AddTask(packet);
                 }
             }
         }
